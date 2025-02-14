@@ -37,9 +37,9 @@ GRANT ALL ON TABLE alfred_v1.operations TO username;
 
 CREATE TABLE alfred_v1.permissions (
 	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "resource_name" VARCHAR(50) NOT NULL REFERENCES alfred_v1.resources (name),
-    "operation_name" VARCHAR(50) NOT NULL REFERENCES alfred_v1.operations (name),
-	UNIQUE ("resource_name", "operation_name")
+    "resource" VARCHAR(50) NOT NULL REFERENCES alfred_v1.resources (name),
+    "operation" VARCHAR(50) NOT NULL REFERENCES alfred_v1.operations (name),
+	UNIQUE ("resource", "operation")
 );
 
 ALTER TABLE alfred_v1.permissions OWNER TO username;
@@ -70,8 +70,8 @@ GRANT ALL ON TABLE alfred_v1.roles TO username;
 
 CREATE TABLE alfred_v1.permission_roles (
 	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "permission_uuid" UUID NOT NULL REFERENCES alfred_v1.permissions (uuid),
-    "role_uuid" UUID NOT NULL REFERENCES alfred_v1.roles (uuid)
+    "permission" UUID NOT NULL REFERENCES alfred_v1.permissions (uuid),
+    "role" UUID NOT NULL REFERENCES alfred_v1.roles (uuid)
 );
 
 ALTER TABLE alfred_v1.permission_roles OWNER TO username;
@@ -107,14 +107,11 @@ GRANT ALL ON TABLE alfred_v1.user_status TO username;
 
 CREATE TABLE alfred_v1.users (
 	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "mail" VARCHAR(50) UNIQUE NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
     "user_status" VARCHAR(50) NOT NULL REFERENCES alfred_v1.user_status (name),
     "_created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "_created_by" VARCHAR(255) NOT NULL,
 	"_updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"_updated_by" VARCHAR(255) NOT NULL,
-	CONSTRAINT check_empty_mail CHECK ((TRIM(BOTH FROM mail) <> ''::text)),
 	CONSTRAINT check_empty_created_by CHECK ((TRIM(BOTH FROM _created_by) <> ''::text)),
 	CONSTRAINT check_empty_updated_by CHECK ((TRIM(BOTH FROM _updated_by) <> ''::text))
 );
@@ -127,8 +124,8 @@ GRANT ALL ON TABLE alfred_v1.users TO username;
 -- user_roles
 
 CREATE TABLE alfred_v1.user_roles (
-    "user_uuid" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
-    "role_uuid" UUID NOT NULL REFERENCES alfred_v1.roles (uuid)
+    "user" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
+    "role" UUID NOT NULL REFERENCES alfred_v1.roles (uuid)
 );
 
 ALTER TABLE alfred_v1.user_roles OWNER TO username;
@@ -139,7 +136,7 @@ GRANT ALL ON TABLE alfred_v1.user_roles TO username;
 -- user_groups
 
 CREATE TABLE alfred_v1.user_groups (
-    "user_uuid" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
+    "user" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
     "user_type" VARCHAR(50) NOT NULL REFERENCES alfred_v1.user_types (name)
 );
 

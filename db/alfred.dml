@@ -35,8 +35,8 @@ INSERT INTO alfred_v1.operations (name) VALUES ('write');
 
 -- roles
 
-* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('only_read', 'user@mail.com', 'user@mail.com', 'cca15f0e-d2ff-4fbe-a7b3-776c5efa5eee');
-* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('insurances', 'user@mail.com', 'user@mail.com', 'a139d58d-8b64-4885-8297-70cbb60f018c');
+* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('only_read', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'cca15f0e-d2ff-4fbe-a7b3-776c5efa5eee');
+* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('insurances', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'a139d58d-8b64-4885-8297-70cbb60f018c');
 
 
 
@@ -60,9 +60,7 @@ INSERT INTO alfred_v1.operations (name) VALUES ('write');
 
 -- users
 
-* INSERT INTO alfred_v1.users (mail, password, user_status, _created_by, _updated_by) VALUES ('manager_user@mail.com', 'passwordEncrypted', ''active', 'user@mail.com', 'user@mail.com');
-* INSERT INTO alfred_v1.users (uuid, mail, password, user_status, _created_by, _updated_by) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'president_user@mail.com', 'passwordEncrypted', 'active', 'manager_user@mail.com', 'manager_user@mail.com');
-* INSERT INTO alfred_v1.users (mail, password, user_status, _created_by, _updated_by) VALUES ('neighbour_user@mail.com', 'passwordEncrypted', 'pending', 'manager_user@mail.com', 'manager_user@mail.com');
+* INSERT INTO alfred_v1.users (uuid, user_status, _created_by, _updated_by) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'pending', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61');
 
 
 

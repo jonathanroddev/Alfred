@@ -1,11 +1,10 @@
-package com.alfred.backoffice.modules.rbac.domain.model;
+package com.alfred.backoffice.modules.auth.application.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class Resource {
-
+public class ResourceDTO {
     private String name;
 }

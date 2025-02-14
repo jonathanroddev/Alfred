@@ -1,10 +1,10 @@
-package com.alfred.backoffice.modules.rbac.application.service;
+package com.alfred.backoffice.modules.auth.application.service;
 
-import com.alfred.backoffice.modules.rbac.application.dto.mapper.ResourceMapper;
-import com.alfred.backoffice.modules.rbac.application.dto.response.ResourceDTO;
-import com.alfred.backoffice.modules.rbac.domain.repository.ResourceRepository;
-import com.alfred.backoffice.modules.rbac.domain.service.ResourceService;
-import com.alfred.backoffice.modules.rbac.infrastructure.persistence.ResourceEntity;
+import com.alfred.backoffice.modules.auth.application.dto.mapper.ResourceMapper;
+import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
+import com.alfred.backoffice.modules.auth.domain.repository.ResourceRepository;
+import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
+import com.alfred.backoffice.modules.auth.infrastructure.persistence.ResourceEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

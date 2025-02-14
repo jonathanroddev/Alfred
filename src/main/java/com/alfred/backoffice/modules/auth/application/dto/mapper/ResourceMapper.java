@@ -1,7 +1,7 @@
-package com.alfred.backoffice.modules.rbac.application.dto.mapper;
+package com.alfred.backoffice.modules.auth.application.dto.mapper;
 
-import com.alfred.backoffice.modules.rbac.application.dto.response.ResourceDTO;
-import com.alfred.backoffice.modules.rbac.infrastructure.persistence.ResourceEntity;
+import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
+import com.alfred.backoffice.modules.auth.infrastructure.persistence.ResourceEntity;
 import org.mapstruct.Mapper;
 
 import java.util.List;

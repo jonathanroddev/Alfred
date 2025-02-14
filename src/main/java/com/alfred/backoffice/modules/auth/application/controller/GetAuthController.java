@@ -1,7 +1,7 @@
-package com.alfred.backoffice.modules.rbac.application.controller;
+package com.alfred.backoffice.modules.auth.application.controller;
 
-import com.alfred.backoffice.modules.rbac.application.dto.response.ResourceDTO;
-import com.alfred.backoffice.modules.rbac.domain.service.ResourceService;
+import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
+import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +12,8 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.v1.path}/${module.rbac.path}")
-public class GetRbacController {
+@RequestMapping("${api.v1.path}/${module.auth.path}")
+public class GetAuthController {
 
     private final ResourceService resourceService;
 
