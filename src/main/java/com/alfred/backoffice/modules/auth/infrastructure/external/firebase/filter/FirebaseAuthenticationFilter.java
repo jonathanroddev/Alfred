@@ -14,6 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
@@ -37,14 +39,24 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             List<GrantedAuthority> fireBaseAuthorities = this.getAuthoritiesFromToken(token);
 
             // TODO: Add our permissions
-            List<String> permissions = List.of("RESOURCE_PERMISSION");
-            List<GrantedAuthority> alfredAuthorities = AuthorityUtils.createAuthorityList(permissions.toArray(new String[0]));
+            // It's necessary to add the prefix in order to use it with Spring Security hasRole
+            List<String> permissions = Stream.of("RESOURCE_PERMISSION")
+                    .map(role -> "ROLE_" + role)
+                    .toList();
 
-            alfredAuthorities.addAll(fireBaseAuthorities);
+            // TODO: Get types of user
+            List<String> userTypes = List.of("admin");
+
+            List<GrantedAuthority> alfredPermissionsAuthorities = AuthorityUtils.createAuthorityList(permissions.toArray(new String[0]));
+            List<GrantedAuthority> alfredUserTypesAuthorities = AuthorityUtils.createAuthorityList(userTypes.toArray(new String[0]));
+
+            alfredPermissionsAuthorities.addAll(fireBaseAuthorities);
+            alfredPermissionsAuthorities.addAll(alfredUserTypesAuthorities);
 
             SecurityContextHolder.getContext()
                     .setAuthentication(
-                            new FirebaseAuthenticationToken(idToken, token, alfredAuthorities));
+                            new FirebaseAuthenticationToken(idToken, token, alfredPermissionsAuthorities));
+
 
             SecurityContextHolder.getContext().getAuthentication().setAuthenticated(true);
 

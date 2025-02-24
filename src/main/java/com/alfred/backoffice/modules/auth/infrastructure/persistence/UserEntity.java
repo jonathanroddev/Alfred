@@ -26,6 +26,10 @@ public class UserEntity {
     @JoinColumn(name = "user_status", referencedColumnName = "name", nullable = false)
     private UserStatusEntity userStatus;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "community", referencedColumnName = "uuid", nullable = false)
+    private CommunityEntity community;
+
     @Column(name = "_created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -90,11 +90,13 @@ GRANT ALL ON TABLE alfred_v1.permissions TO username;
 
 CREATE TABLE alfred_v1.roles (
 	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "name" VARCHAR(50) UNIQUE,
+    "name" VARCHAR(50),
+    "community" UUID NOT NULL REFERENCES alfred_v1.communities (uuid),
     "_created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "_created_by" VARCHAR(255) NOT NULL,
 	"_updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"_updated_by" VARCHAR(255) NOT NULL,
+	UNIQUE ("name", "community"),
 	CONSTRAINT check_empty_name CHECK ((TRIM(BOTH FROM name) <> ''::text)),
 	CONSTRAINT check_empty_created_by CHECK ((TRIM(BOTH FROM _created_by) <> ''::text)),
 	CONSTRAINT check_empty_updated_by CHECK ((TRIM(BOTH FROM _updated_by) <> ''::text))

@@ -28,6 +28,10 @@ public class RoleEntity {
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Name cannot contain only spaces.")
     private String name;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "community", referencedColumnName = "uuid", nullable = false)
+    private CommunityEntity community;
+
     @Column(name = "_created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

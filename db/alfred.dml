@@ -56,20 +56,21 @@ INSERT INTO alfred_v1.user_status (name) VALUES ('pending');
 
 
 
-/*
-
 -- permissions
 
-* INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('banks', 'read', 'abbe069d-1f40-4bd0-9f9b-6283f125f3bf');
-* INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurances', 'read', '8de5dc29-d5e9-4080-931f-8723245e7b1a');
-* INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurances', 'write', 'd0fc60ff-8e62-4c95-871d-513577ef5e0b');
+INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('banks', 'read', 'abbe069d-1f40-4bd0-9f9b-6283f125f3bf');
+INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('banks', 'write', '3707e539-1cf7-40f6-9183-8525ef2757c6');
+INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurances', 'read', '8de5dc29-d5e9-4080-931f-8723245e7b1a');
+INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurances', 'write', 'd0fc60ff-8e62-4c95-871d-513577ef5e0b');
 
 
+
+/*
 
 -- roles
 
-* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('only_read', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'cca15f0e-d2ff-4fbe-a7b3-776c5efa5eee');
-* INSERT INTO alfred_v1.roles (name, _created_by, _updated_by, uuid) VALUES ('insurances', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'a139d58d-8b64-4885-8297-70cbb60f018c');
+* INSERT INTO alfred_v1.roles (name, community, _created_by, _updated_by, uuid) VALUES ('only_read', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7, '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'cca15f0e-d2ff-4fbe-a7b3-776c5efa5eee');
+* INSERT INTO alfred_v1.roles (name, community, _created_by, _updated_by, uuid) VALUES ('insurances', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7, '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', 'a139d58d-8b64-4885-8297-70cbb60f018c');
 
 
 
