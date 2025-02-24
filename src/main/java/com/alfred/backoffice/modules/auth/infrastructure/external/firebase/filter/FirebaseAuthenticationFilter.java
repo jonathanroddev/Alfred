@@ -45,7 +45,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
                     .toList();
 
             // TODO: Get types of user
-            List<String> userTypes = List.of("admin");
+            List<String> userTypes = List.of("admin", "manager");
 
             List<GrantedAuthority> alfredPermissionsAuthorities = AuthorityUtils.createAuthorityList(permissions.toArray(new String[0]));
             List<GrantedAuthority> alfredUserTypesAuthorities = AuthorityUtils.createAuthorityList(userTypes.toArray(new String[0]));

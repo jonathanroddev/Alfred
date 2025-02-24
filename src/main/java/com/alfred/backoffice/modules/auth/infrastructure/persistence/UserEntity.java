@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -53,6 +54,9 @@ public class UserEntity {
         if (this.uuid == null) {
             this.uuid = UUID.randomUUID();
         }
+        String currentUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        this.createdBy = currentUser;
+        this.updatedBy = currentUser;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

@@ -1,8 +1,12 @@
 package com.alfred.backoffice.modules.auth.application.controller;
 
+import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.OperationDTO;
+import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
+import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.OperationService;
+import com.alfred.backoffice.modules.auth.domain.service.PlanService;
 import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +23,21 @@ import java.util.List;
 @RequestMapping("${api.v1.path}/${module.auth.path}")
 public class GetAuthController {
 
+    private final PlanService planService;
+    private final CommunityService communityService;
     private final ResourceService resourceService;
     private final OperationService operationService;
+
+    @GetMapping(path = "/plans")
+    List<PlanDTO> getPlans() {
+        return planService.getAllPlans();
+    }
+
+    @GetMapping(path = "/communities")
+    @PreAuthorize("hasAuthority('admin')")
+    List<CommunityDTO> getCommunities() {
+        return communityService.getAllCommunities();
+    }
 
     @GetMapping(path = "/resources")
     List<ResourceDTO> getResources() {
@@ -28,7 +45,7 @@ public class GetAuthController {
     }
 
     @GetMapping(path = "/operations")
-    @PreAuthorize("hasAuthority('admin')")
+    @PreAuthorize("hasAuthority('manager')")
     List<OperationDTO> getOperations() {
         return operationService.getAllOperations();
     }

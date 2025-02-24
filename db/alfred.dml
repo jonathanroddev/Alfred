@@ -40,6 +40,7 @@ INSERT INTO alfred_v1.operations (name) VALUES ('write');
 
 -- user_types
 
+INSERT INTO alfred_v1.user_types (name) VALUES ('admin');
 INSERT INTO alfred_v1.user_types (name) VALUES ('manager');
 INSERT INTO alfred_v1.user_types (name) VALUES ('president');
 INSERT INTO alfred_v1.user_types (name) VALUES ('neighbour');
