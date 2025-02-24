@@ -9,6 +9,32 @@ CREATE EXTENSION pgcrypto;
 
 
 
+-- plans
+
+CREATE TABLE alfred_v1.plans (
+    "name" VARCHAR(50) PRIMARY KEY,
+	CONSTRAINT check_empty_name CHECK ((TRIM(BOTH FROM name) <> ''::text))
+);
+
+ALTER TABLE alfred_v1.plans OWNER TO username;
+GRANT ALL ON TABLE alfred_v1.plans TO username;
+
+
+
+-- communities
+
+CREATE TABLE alfred_v1.communities (
+    "uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" VARCHAR(50) UNIQUE,
+	"plan" VARCHAR(50) NOT NULL REFERENCES alfred_v1.plans (name),
+	CONSTRAINT check_empty_name CHECK ((TRIM(BOTH FROM name) <> ''::text))
+);
+
+ALTER TABLE alfred_v1.communities OWNER TO username;
+GRANT ALL ON TABLE alfred_v1.communities TO username;
+
+
+
 -- resources
 
 CREATE TABLE alfred_v1.resources (
@@ -18,6 +44,19 @@ CREATE TABLE alfred_v1.resources (
 
 ALTER TABLE alfred_v1.resources OWNER TO username;
 GRANT ALL ON TABLE alfred_v1.resources TO username;
+
+
+
+-- plans_resources
+
+CREATE TABLE alfred_v1.plans_resources (
+	"plan" VARCHAR(50) NOT NULL REFERENCES alfred_v1.plans (name),
+    "resource" VARCHAR(50) NOT NULL REFERENCES alfred_v1.resources (name),
+	UNIQUE ("resource", "plan")
+);
+
+ALTER TABLE alfred_v1.plans_resources OWNER TO username;
+GRANT ALL ON TABLE alfred_v1.plans_resources TO username;
 
 
 
@@ -108,6 +147,7 @@ GRANT ALL ON TABLE alfred_v1.user_status TO username;
 CREATE TABLE alfred_v1.users (
 	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "user_status" VARCHAR(50) NOT NULL REFERENCES alfred_v1.user_status (name),
+    "community" UUID NOT NULL REFERENCES alfred_v1.communities (uuid),
     "_created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "_created_by" VARCHAR(255) NOT NULL,
 	"_updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
