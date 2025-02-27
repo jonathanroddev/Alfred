@@ -4,15 +4,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+@ToString(exclude = "users")
+@EqualsAndHashCode(exclude = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -52,12 +52,7 @@ public class RoleEntity {
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Updated by cannot contain only spaces.")
     private String updatedBy;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "role"),
-            inverseJoinColumns = @JoinColumn(name = "user")
-    )
+    @ManyToMany(mappedBy = "roles")
     private Set<UserEntity> users = new HashSet<>();
 
     @PrePersist

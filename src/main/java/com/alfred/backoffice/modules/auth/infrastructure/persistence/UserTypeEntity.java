@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@ToString(exclude = "users")
+@EqualsAndHashCode(exclude = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -25,12 +25,7 @@ public class UserTypeEntity {
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Name cannot contain only spaces.")
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_groups",
-            joinColumns = @JoinColumn(name = "user_type"),
-            inverseJoinColumns = @JoinColumn(name = "user")
-    )
+    @ManyToMany(mappedBy = "userTypes")
     private Set<UserEntity> users = new HashSet<>();
 
 }

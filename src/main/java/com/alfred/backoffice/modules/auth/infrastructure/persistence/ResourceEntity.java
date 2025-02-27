@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@ToString(exclude = "plans")
+@EqualsAndHashCode(exclude = "plans")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -25,12 +25,7 @@ public class ResourceEntity {
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Name cannot contain only spaces.")
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "plans_resources",
-            joinColumns = @JoinColumn(name = "resource"),
-            inverseJoinColumns = @JoinColumn(name = "plan")
-    )
+    @ManyToMany(mappedBy = "resources")
     private Set<PlanEntity> plans = new HashSet<>();
 
 }
