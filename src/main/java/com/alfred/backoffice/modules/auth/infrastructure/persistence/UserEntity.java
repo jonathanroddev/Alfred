@@ -1,7 +1,7 @@
 package com.alfred.backoffice.modules.auth.infrastructure.persistence;
 
 import jakarta.persistence.*;
-        import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -48,6 +50,22 @@ public class UserEntity {
     @NotBlank(message = "Updated by cannot be blank.")
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Updated by cannot contain only spaces.")
     private String updatedBy;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user"),
+            inverseJoinColumns = @JoinColumn(name = "role")
+    )
+    private Set<RoleEntity> roles = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_groups",
+            joinColumns = @JoinColumn(name = "user"),
+            inverseJoinColumns = @JoinColumn(name = "user_type")
+    )
+    private Set<UserTypeEntity> userTypes = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

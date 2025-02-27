@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -49,6 +51,14 @@ public class RoleEntity {
     @NotBlank(message = "Updated by cannot be blank.")
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Updated by cannot contain only spaces.")
     private String updatedBy;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "role"),
+            inverseJoinColumns = @JoinColumn(name = "user")
+    )
+    private Set<UserEntity> users = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

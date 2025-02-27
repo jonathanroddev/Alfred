@@ -40,11 +40,12 @@ INSERT INTO alfred_v1.operations (name) VALUES ('write');
 
 -- user_types
 
-INSERT INTO alfred_v1.user_types (name) VALUES ('admin');
-INSERT INTO alfred_v1.user_types (name) VALUES ('manager');
-INSERT INTO alfred_v1.user_types (name) VALUES ('president');
-INSERT INTO alfred_v1.user_types (name) VALUES ('neighbour');
-INSERT INTO alfred_v1.user_types (name) VALUES ('guest');
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('admin', 0);
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('tester', 1);
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('manager', 1);
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('president', 2);
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('neighbour', 3);
+INSERT INTO alfred_v1.user_types (name, level) VALUES ('guest', 4);
 
 
 

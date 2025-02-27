@@ -124,6 +124,7 @@ GRANT ALL ON TABLE alfred_v1.permission_roles TO username;
 
 CREATE TABLE alfred_v1.user_types (
 	"name" VARCHAR(50) PRIMARY KEY,
+	"level" INTEGER NOT NULL,
 	CONSTRAINT check_empty_name CHECK ((TRIM(BOTH FROM name) <> ''::text))
 );
 
