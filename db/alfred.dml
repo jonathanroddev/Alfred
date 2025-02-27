@@ -67,6 +67,18 @@ INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurance
 
 
 
+-- users
+
+INSERT INTO alfred_v1.users (uuid, user_status, community, _created_by, _updated_by) VALUES ('d7J5dCWORIRp1Y39m2sPILdoS3Q2', 'pending', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2');
+
+
+
+-- user_groups
+
+INSERT INTO alfred_v1.user_groups ("user", user_type) VALUES ('d7J5dCWORIRp1Y39m2sPILdoS3Q2', 'admin');
+
+
+
 /*
 
 -- roles
@@ -85,22 +97,9 @@ INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurance
 
 
 
--- users
-
-* INSERT INTO alfred_v1.users (uuid, user_status, community, _created_by, _updated_by) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'pending', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7', '5a730c6e-b9da-4f11-83d3-3a2f21149b61', '5a730c6e-b9da-4f11-83d3-3a2f21149b61');
-
-
-
 -- user_roles
 
 * INSERT INTO alfred_v1.user_roles (user_uuid, role_uuid) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'a139d58d-8b64-4885-8297-70cbb60f018c');
-
-
-
--- user_groups
-
-* INSERT INTO alfred_v1.user_groups (user, user_type) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'president');
-* INSERT INTO alfred_v1.user_groups (user, user_type) VALUES ('e1236e4e-fb95-4a0f-bc5b-5db41f4aed75', 'neighbour');
 
 */
 

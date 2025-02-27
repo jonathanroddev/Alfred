@@ -148,7 +148,7 @@ GRANT ALL ON TABLE alfred_v1.user_status TO username;
 -- users
 
 CREATE TABLE alfred_v1.users (
-	"uuid" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	"uuid" VARCHAR(50) PRIMARY KEY,
     "user_status" VARCHAR(50) NOT NULL REFERENCES alfred_v1.user_status (name),
     "community" UUID NOT NULL REFERENCES alfred_v1.communities (uuid),
     "_created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -167,7 +167,7 @@ GRANT ALL ON TABLE alfred_v1.users TO username;
 -- user_roles
 
 CREATE TABLE alfred_v1.user_roles (
-    "user" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
+    "user" VARCHAR(50) NOT NULL REFERENCES alfred_v1.users (uuid),
     "role" UUID NOT NULL REFERENCES alfred_v1.roles (uuid)
 );
 
@@ -179,7 +179,7 @@ GRANT ALL ON TABLE alfred_v1.user_roles TO username;
 -- user_groups
 
 CREATE TABLE alfred_v1.user_groups (
-    "user" UUID NOT NULL REFERENCES alfred_v1.users (uuid),
+    "user" VARCHAR(50) NOT NULL REFERENCES alfred_v1.users (uuid),
     "user_type" VARCHAR(50) NOT NULL REFERENCES alfred_v1.user_types (name)
 );
 

@@ -1,8 +1,10 @@
 package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
+import com.alfred.backoffice.modules.auth.application.dto.mapper.UserMapper;
 import com.alfred.backoffice.modules.auth.application.request.UserSignup;
 import com.alfred.backoffice.modules.auth.domain.model.Community;
+import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.repository.UserRepository;
 import com.alfred.backoffice.modules.auth.domain.repository.UserStatusRepository;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
@@ -13,13 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    // TODO: Call to CommunityService and UserStatusService instead of their mapper and repository
+
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final FirebaseService firebaseService;
     private final CommunityMapper communityMapper;
     private final UserStatusRepository userStatusRepository;
@@ -34,15 +38,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(String mail, Community community) throws Exception {
-        // TODO: Add automatic password generation in order to send a mail to the user so they can reset it
+        // TODO: Pass password as argument
         String userUuid = this.firebaseService.createUser(mail, "test12");
         Optional<UserStatusEntity> userStatusEntity = userStatusRepository.findById("pending");
         if (userStatusEntity.isPresent()) {
             UserEntity userEntity = new UserEntity();
-            userEntity.setUuid(UUID.fromString(userUuid));
+            userEntity.setUuid(userUuid);
             userEntity.setCommunity(communityMapper.toEntity(community));
             userEntity.setUserStatus(userStatusEntity.get());
             userRepository.save(userEntity);
         }
+    }
+
+    @Override
+    public User getUser(String uuid) throws Exception {
+        Optional<UserEntity> userEntity = userRepository.findById(uuid);
+        if (userEntity.isPresent()){
+            return userMapper.toModel(userEntity.get());
+        }
+        throw new Exception();
     }
 }

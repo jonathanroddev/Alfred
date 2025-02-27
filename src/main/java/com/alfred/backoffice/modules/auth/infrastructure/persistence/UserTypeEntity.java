@@ -25,6 +25,9 @@ public class UserTypeEntity {
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Name cannot contain only spaces.")
     private String name;
 
+    @Column(name = "level", nullable = false)
+    private int level;
+
     @ManyToMany(mappedBy = "userTypes")
     private Set<UserEntity> users = new HashSet<>();
 

@@ -45,7 +45,7 @@ public class GetAuthController {
     }
 
     @GetMapping(path = "/operations")
-    @PreAuthorize("hasAuthority('manager')")
+    @PreAuthorize("@authorizationService.hasAccess(authentication, 1)")
     List<OperationDTO> getOperations() {
         return operationService.getAllOperations();
     }
