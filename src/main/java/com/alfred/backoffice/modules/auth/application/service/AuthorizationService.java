@@ -16,9 +16,15 @@ public class AuthorizationService {
     private final UserService userService;
 
     @SneakyThrows
-    public boolean hasAccess(Authentication authentication, int level) {
-        // TODO: Add also validation for user' status
+    public boolean hasAccess(Authentication authentication) {
+        User user = userService.getUser((String) authentication.getPrincipal());
+        return user.getUserStatus().getName().equals("active");
+    }
+
+    @SneakyThrows
+    public boolean hasLevel(Authentication authentication, int level) {
         User user = userService.getUser((String) authentication.getPrincipal());
         return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= level);
     }
+
 }

@@ -33,19 +33,19 @@ public class GetAuthController {
         return planService.getAllPlans();
     }
 
-    @GetMapping(path = "/communities")
-    @PreAuthorize("hasAuthority('admin')")
-    List<CommunityDTO> getCommunities() {
-        return communityService.getAllCommunities();
-    }
-
     @GetMapping(path = "/resources")
     List<ResourceDTO> getResources() {
         return resourceService.getAllResources();
     }
 
+    @GetMapping(path = "/communities")
+    @PreAuthorize("@authorizationService.hasAccess(authentication) && @authorizationService.hasLevel(authentication, 0)")
+    List<CommunityDTO> getCommunities() {
+        return communityService.getAllCommunities();
+    }
+
     @GetMapping(path = "/operations")
-    @PreAuthorize("@authorizationService.hasAccess(authentication, 1)")
+    @PreAuthorize("@authorizationService.hasAccess(authentication) && @authorizationService.hasLevel(authentication, 1)")
     List<OperationDTO> getOperations() {
         return operationService.getAllOperations();
     }

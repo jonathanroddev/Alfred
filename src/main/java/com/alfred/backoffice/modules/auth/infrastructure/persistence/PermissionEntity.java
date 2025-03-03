@@ -24,7 +24,7 @@ public class PermissionEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "operation", referencedColumnName = "name", nullable = false)
-    private OperationEntity operationEntity;
+    private OperationEntity operation;
 
     @PrePersist
     public void prePersist() {

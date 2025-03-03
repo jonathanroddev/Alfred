@@ -55,6 +55,9 @@ public class RoleEntity {
     @ManyToMany(mappedBy = "roles")
     private Set<UserEntity> users = new HashSet<>();
 
+    @OneToMany(mappedBy = "role")
+    private Set<PermissionRoleEntity> permissionsRoles = new HashSet<>();
+
     @PrePersist
     public void prePersist() {
         if (this.uuid == null) {

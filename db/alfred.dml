@@ -69,13 +69,13 @@ INSERT INTO alfred_v1.permissions (resource, operation, uuid) VALUES ('insurance
 
 -- users
 
-INSERT INTO alfred_v1.users (uuid, user_status, community, _created_by, _updated_by) VALUES ('d7J5dCWORIRp1Y39m2sPILdoS3Q2', 'pending', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2');
+INSERT INTO alfred_v1.users (uuid, external_uuid, user_status, community, _created_by, _updated_by) VALUES ('f26cf55b-9bb2-4583-8aba-4ffc79c0be9e', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2', 'pending', 'c511fd2e-bdb8-404f-885a-7c5a5e9fd7f7', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2', 'd7J5dCWORIRp1Y39m2sPILdoS3Q2');
 
 
 
 -- user_groups
 
-INSERT INTO alfred_v1.user_groups ("user", user_type) VALUES ('d7J5dCWORIRp1Y39m2sPILdoS3Q2', 'admin');
+INSERT INTO alfred_v1.user_groups ("user", user_type) VALUES ('f26cf55b-9bb2-4583-8aba-4ffc79c0be9e', 'admin');
 
 
 

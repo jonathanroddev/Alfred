@@ -20,11 +20,11 @@ public class PermissionRoleEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "permission", referencedColumnName = "uuid", nullable = false)
-    private PermissionEntity permissionEntity;
+    private PermissionEntity permission;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "role", referencedColumnName = "uuid", nullable = false)
-    private RoleEntity roleEntity;
+    private RoleEntity role;
 
     @PrePersist
     public void prePersist() {

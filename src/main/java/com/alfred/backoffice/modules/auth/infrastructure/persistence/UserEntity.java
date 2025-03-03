@@ -23,7 +23,10 @@ public class UserEntity {
 
     @Id
     @Column(name = "uuid", nullable = false, updatable = false)
-    private String uuid;
+    private UUID uuid;
+
+    @Column(name = "external_uuid", nullable = false, updatable = false)
+    private String externalUuid;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_status", referencedColumnName = "name", nullable = false)
@@ -69,6 +72,9 @@ public class UserEntity {
 
     @PrePersist
     public void prePersist() {
+        if (this.uuid == null) {
+            this.uuid = UUID.randomUUID();
+        }
         String currentUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this.createdBy = currentUser;
         this.updatedBy = currentUser;

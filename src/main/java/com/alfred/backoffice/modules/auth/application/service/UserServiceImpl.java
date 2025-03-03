@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +40,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void createUser(String mail, Community community) throws Exception {
         // TODO: Pass password as argument
-        String userUuid = this.firebaseService.createUser(mail, "test12");
+        String externalUuid = this.firebaseService.createUser(mail, "test12");
         Optional<UserStatusEntity> userStatusEntity = userStatusRepository.findById("pending");
         if (userStatusEntity.isPresent()) {
             UserEntity userEntity = new UserEntity();
-            userEntity.setUuid(userUuid);
+            userEntity.setExternalUuid(externalUuid);
             userEntity.setCommunity(communityMapper.toEntity(community));
             userEntity.setUserStatus(userStatusEntity.get());
             userRepository.save(userEntity);
@@ -51,8 +52,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(String uuid) throws Exception {
+    public User getUser(UUID uuid) throws Exception {
         Optional<UserEntity> userEntity = userRepository.findById(uuid);
+        if (userEntity.isPresent()){
+            return userMapper.toModel(userEntity.get());
+        }
+        throw new Exception();
+    }
+
+    @Override
+    public User getUser(String externalUuid) throws Exception {
+        Optional<UserEntity> userEntity = userRepository.findByExternalUuid(externalUuid);
         if (userEntity.isPresent()){
             return userMapper.toModel(userEntity.get());
         }
