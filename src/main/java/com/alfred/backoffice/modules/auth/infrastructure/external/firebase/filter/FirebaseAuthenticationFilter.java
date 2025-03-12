@@ -11,6 +11,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,9 +24,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Component
+@RequiredArgsConstructor
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
+
+    private final UserService userService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -51,26 +57,24 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         try {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             FirebaseToken token = firebaseAuth.verifyIdToken(idToken.replace("Bearer ", ""));
-            List<GrantedAuthority> fireBaseAuthorities = this.getAuthoritiesFromToken(token);
 
             /*
             TODO: A way to allow same user for different communities is send the community in headers
              and then filter by it. In that case we need to control the exception that will happen after
              the first save for a same user.
+             */
 
              User user = userService.getUser(token.getUid());
              Set<Role> roles = user.getRoles();
-             */
-            
-            // TODO: Add our permissions
-            // It's necessary to add the prefix in order to use it with Spring Security hasRole
-            List<String> permissions = Stream.of("RESOURCE_PERMISSION")
-                    .map(role -> "ROLE_" + role)
-                    .toList();
 
-            List<GrantedAuthority> alfredPermissionsAuthorities = AuthorityUtils.createAuthorityList(permissions.toArray(new String[0]));
+            List<GrantedAuthority> alfredPermissionsAuthorities = AuthorityUtils.createAuthorityList(
+                    roles.stream()
+                            .flatMap(role -> role.getPermissionRoles().stream()
+                                    .map(permissionRole -> String.format("%s_%s",
+                                            permissionRole.getPermission().getResource().getName(),
+                                            permissionRole.getPermission().getOperation().getName()))
+                            ).distinct().toArray(String[]::new));
 
-            alfredPermissionsAuthorities.addAll(fireBaseAuthorities);
 
             SecurityContextHolder.getContext()
                     .setAuthentication(

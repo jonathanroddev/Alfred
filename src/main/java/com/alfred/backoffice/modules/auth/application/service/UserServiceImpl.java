@@ -11,6 +11,7 @@ import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.service.FirebaseService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusEntity;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,7 @@ public class UserServiceImpl implements UserService {
         throw new Exception();
     }
 
+    @Transactional
     @Override
     public User getUser(String externalUuid) throws Exception {
         Optional<UserEntity> userEntity = userRepository.findByExternalUuid(externalUuid);

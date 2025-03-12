@@ -16,15 +16,17 @@ public class AuthorizationService {
     private final UserService userService;
 
     @SneakyThrows
-    public boolean hasAccess(Authentication authentication) {
-        User user = userService.getUser((String) authentication.getPrincipal());
-        return user.getUserStatus().getName().equals("active");
+    public boolean hasAccess(User user) {
+        return "active".equals(user.getUserStatus().getName());
     }
 
     @SneakyThrows
     public boolean hasLevel(Authentication authentication, int level) {
         User user = userService.getUser((String) authentication.getPrincipal());
-        return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= level);
+        if (this.hasAccess(user)) {
+            return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= level);
+        }
+        return false;
     }
 
 }
