@@ -22,6 +22,10 @@ For building and running the application you need:
 - [JDK 21](https://adoptium.net/es/temurin/releases/)
 - [Maven 3](https://maven.apache.org)
 
+### Check the docs at any of:
+- **${host}**_/api/docs_
+- **${host}**_/api/swagger-ui/index.html_
+
 ## Authors
 
 - [_@jayad23_](https://github.com/jayad23)

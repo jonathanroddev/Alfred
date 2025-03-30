@@ -37,7 +37,8 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         // TODO: Improve this maybe by adding a prefix public for the endpoints
-        return path.startsWith("/api/v1/auth/signup") || path.startsWith("/api/v1/auth/plans");
+        List<String> excludes = List.of("public", "signup", "docs", "swagger");
+        return excludes.stream().findAny().filter(path::contains).isPresent();
     }
 
     @Override

@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-
+// TODO: use @RestControllerAdvice
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.v1.path}/${module.auth.path}")
+@RequestMapping("${api.v1.path}")
 public class GetAuthController {
 
     private final PlanService planService;
@@ -28,12 +28,12 @@ public class GetAuthController {
     private final ResourceService resourceService;
     private final OperationService operationService;
 
-    @GetMapping(path = "/plans")
+    @GetMapping(path = "${public.path}/plans")
     List<PlanDTO> getPlans() {
         return planService.getAllPlans();
     }
 
-    @GetMapping(path = "/resources")
+    @GetMapping(path = "${public.path}/resources")
     List<ResourceDTO> getResources() {
         return resourceService.getAllResources();
     }

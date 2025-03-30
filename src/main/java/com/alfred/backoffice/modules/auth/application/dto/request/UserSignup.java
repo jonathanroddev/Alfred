@@ -1,4 +1,4 @@
-package com.alfred.backoffice.modules.auth.application.request;
+package com.alfred.backoffice.modules.auth.application.dto.request;
 
 import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
 import lombok.AllArgsConstructor;
@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserSignup {
     private String mail;
-    private CommunityDTO communityDTO;
+    private String password;
+    private String communityId;
 }

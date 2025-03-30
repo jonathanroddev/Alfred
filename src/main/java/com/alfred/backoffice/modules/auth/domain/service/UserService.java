@@ -1,15 +1,14 @@
 package com.alfred.backoffice.modules.auth.domain.service;
 
-import com.alfred.backoffice.modules.auth.application.request.UserSignup;
-import com.alfred.backoffice.modules.auth.domain.model.Community;
+import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 
 import java.util.UUID;
 
 
 public interface UserService {
-    void signup(UserSignup userSignup) throws Exception;
-    void createUser(String mail, Community community) throws Exception;
+    void signup(UserSignup userSignup);
+    void createUser(UserSignup userSignup) throws Exception;
     User getUser(UUID uuid) throws Exception;
     User getUser(String externalUuid) throws Exception;
 }
