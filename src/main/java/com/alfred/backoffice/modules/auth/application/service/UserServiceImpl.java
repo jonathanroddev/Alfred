@@ -2,12 +2,16 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserMapper;
+import com.alfred.backoffice.modules.auth.application.dto.mapper.UserStatusMapper;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
+import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.domain.model.User;
+import com.alfred.backoffice.modules.auth.domain.model.UserStatus;
 import com.alfred.backoffice.modules.auth.domain.repository.UserRepository;
 import com.alfred.backoffice.modules.auth.domain.repository.UserStatusRepository;
 import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
+import com.alfred.backoffice.modules.auth.domain.service.UserStatusService;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.service.FirebaseService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
@@ -24,7 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    // TODO: Call to CommunityService and UserStatusService instead of their mapper and repository
+    // TODO: Consider to call to CommunityService, UserStatusService instead of their mapper and repository
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -32,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final CommunityMapper communityMapper;
     private final CommunityService communityService;
     private final UserStatusRepository userStatusRepository;
+    private final UserStatusService userStatusService;
 
     // Method used by Alfred's team
     @SneakyThrows
@@ -44,8 +49,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserSignup userSignup) throws Exception {
-        // TODO: Pass password as argument
-
         CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
         // TODO: Handle exception on duplicate in Firebase to check if exists with same community in Alfred
         String externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
@@ -59,13 +62,21 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
     @Override
-    public User getUser(UUID uuid) throws Exception {
-        Optional<UserEntity> userEntity = userRepository.findById(uuid);
+    public UserEntity getUserEntity(UUID uuid) throws Exception {
+        Optional<UserEntity> userEntity =  userRepository.findById(uuid);
         if (userEntity.isPresent()){
-            return userMapper.toModel(userEntity.get());
+            return userEntity.get();
         }
+        // TODO: Handle throw custom exception
         throw new Exception();
+    }
+
+    @SneakyThrows
+    @Override
+    public User getUser(UUID uuid) {
+        return userMapper.toModel(this.getUserEntity(uuid));
     }
 
     @Transactional
@@ -76,5 +87,16 @@ public class UserServiceImpl implements UserService {
             return userMapper.toModel(userEntity.get());
         }
         throw new Exception();
+    }
+
+    @SneakyThrows
+    @Transactional
+    @Override
+    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) {
+        // TODO: Handle UUID.fromString exceptions in all project
+        UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
+        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
+        userEntity.setUserStatus(userStatusEntity);
+        this.userRepository.save(userEntity);
     }
 }

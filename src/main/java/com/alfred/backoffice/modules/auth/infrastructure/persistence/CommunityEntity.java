@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class CommunityEntity {
     @Column(name = "uuid", nullable = false, updatable = false)
     private UUID uuid;
 
-    @Column(name = "name", length = 50, nullable = false, updatable = false)
+    @Column(name = "name", length = 50, nullable = false, updatable = false, unique = true)
     @Size(max = 50, message = "Name must be at most 50 characters long.")
     @NotBlank(message = "Name cannot be blank.")
     @Pattern(regexp = "\\S.*\\S|\\S", message = "Name cannot contain only spaces.")

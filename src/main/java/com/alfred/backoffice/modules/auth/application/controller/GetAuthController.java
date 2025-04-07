@@ -1,13 +1,7 @@
 package com.alfred.backoffice.modules.auth.application.controller;
 
-import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.OperationDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
-import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
-import com.alfred.backoffice.modules.auth.domain.service.OperationService;
-import com.alfred.backoffice.modules.auth.domain.service.PlanService;
-import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
+import com.alfred.backoffice.modules.auth.application.dto.response.*;
+import com.alfred.backoffice.modules.auth.domain.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +18,9 @@ import java.util.List;
 public class GetAuthController {
 
     private final PlanService planService;
-    private final CommunityService communityService;
     private final ResourceService resourceService;
+    private final UserStatusService userStatusService;
+    private final CommunityService communityService;
     private final OperationService operationService;
 
     @GetMapping(path = "${public.path}/plans")
@@ -36,6 +31,11 @@ public class GetAuthController {
     @GetMapping(path = "${public.path}/resources")
     List<ResourceDTO> getResources() {
         return resourceService.getAllResources();
+    }
+
+    @GetMapping(path = "${public.path}/user-status")
+    List<UserStatusDTO> getUserStatus() {
+        return userStatusService.getAllUserStatus();
     }
 
     @GetMapping(path = "/communities")

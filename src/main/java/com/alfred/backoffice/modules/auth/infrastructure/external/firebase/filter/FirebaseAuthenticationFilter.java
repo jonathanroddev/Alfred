@@ -36,9 +36,8 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // TODO: Improve this maybe by adding a prefix public for the endpoints
         List<String> excludes = List.of("public", "signup", "docs", "swagger");
-        return excludes.stream().findAny().filter(path::contains).isPresent();
+        return excludes.stream().anyMatch(path::contains);
     }
 
     @Override
@@ -65,6 +64,8 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
              the first save for a same user.
              */
 
+            // TODO: Check user' status
+
              User user = userService.getUser(token.getUid());
              Set<Role> roles = user.getRoles();
 
@@ -76,11 +77,9 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
                                             permissionRole.getPermission().getOperation().getName()))
                             ).distinct().toArray(String[]::new));
 
-
             SecurityContextHolder.getContext()
                     .setAuthentication(
                             new FirebaseAuthenticationToken(idToken, token, alfredPermissionsAuthorities));
-
 
             SecurityContextHolder.getContext().getAuthentication().setAuthenticated(true);
 
