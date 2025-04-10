@@ -20,7 +20,12 @@ public interface CommunityMapper {
 
     CommunityEntity toEntity(Community community);
 
+    CommunityEntity toEntity(CommunityDTO communityDTO);
+
     @Mapping(target = "plan", source = "plan")
     List<CommunityDTO> toDTOList(List<CommunityEntity> communityEntityList);
+
+    @Mapping(target = "plan", source = "plan")
+    CommunityDTO toDTO(CommunityEntity communityEntity);
 
 }

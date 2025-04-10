@@ -1,15 +1,15 @@
 package com.alfred.backoffice.modules.auth.application.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Data
 public class PlanDTO {
     private String name;
+    @Nullable
     private Set<ResourceDTO> resources;
 }

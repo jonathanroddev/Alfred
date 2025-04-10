@@ -25,6 +25,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     private final CommunityRepository communityRepository;
     private final CommunityMapper communityMapper;
+    private final PlanService planService;
 
     @Override
     public List<CommunityDTO> getAllCommunities() {
@@ -46,5 +47,15 @@ public class CommunityServiceImpl implements CommunityService {
             throw new Exception();
         }
         return communityEntity.get();
+    }
+
+    @Override
+    public CommunityDTO createCommunity(CommunityDTO communityDTO) throws Exception {
+        PlanEntity planEntity = this.planService.getPlanEntity(communityDTO.getPlan().getName());
+        CommunityEntity communityEntity = this.communityMapper.toEntity(communityDTO);
+        communityEntity.setUuid(UUID.randomUUID());
+        communityEntity.setPlan(planEntity);
+        this.communityRepository.save(communityEntity);
+        return this.communityMapper.toDTO(communityEntity);
     }
 }

@@ -1,19 +1,17 @@
 package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.PlanMapper;
-import com.alfred.backoffice.modules.auth.application.dto.mapper.ResourceMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
 import com.alfred.backoffice.modules.auth.domain.repository.PlanRepository;
-import com.alfred.backoffice.modules.auth.domain.repository.ResourceRepository;
 import com.alfred.backoffice.modules.auth.domain.service.PlanService;
-import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.PlanEntity;
-import com.alfred.backoffice.modules.auth.infrastructure.persistence.ResourceEntity;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,4 +25,16 @@ public class PlanServiceImpl implements PlanService {
         List<PlanEntity> planEntities = planRepository.findAll();
         return planMapper.toDTOList(planEntities);
     }
+
+    @Transactional
+    @Override
+    public PlanEntity getPlanEntity(String name) throws Exception {
+        Optional<PlanEntity> planEntity =  planRepository.findById(name);
+        if (planEntity.isPresent()){
+            return planEntity.get();
+        }
+        // TODO: Handle throw custom exception
+        throw new Exception();
+    }
+
 }

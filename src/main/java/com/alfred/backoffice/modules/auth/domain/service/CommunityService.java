@@ -10,4 +10,5 @@ public interface CommunityService {
     List<CommunityDTO> getAllCommunities();
     Community getCommunity(String uuid);
     CommunityEntity getCommunityEntity(String uuid) throws Exception;
+    CommunityDTO createCommunity(CommunityDTO communityDTO) throws Exception;
 }

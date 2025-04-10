@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -23,6 +24,10 @@ public class AuthorizationService {
     @SneakyThrows
     public boolean hasLevel(Authentication authentication, int level) {
         User user = userService.getUser((String) authentication.getPrincipal());
+        // TODO: Consider throw a custom exception
+        if (!Objects.equals(user.getUserStatus().getName(), "active")) {
+            return false;
+        }
         if (this.hasAccess(user)) {
             return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= level);
         }
