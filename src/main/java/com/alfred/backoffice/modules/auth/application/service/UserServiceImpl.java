@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
         if (userEntity.isPresent()){
             return userEntity.get();
         }
-        // TODO: Handle throw custom exception
+        // TODO: Handle throw custom exception. Extend of RuntimeException
         throw new Exception();
     }
 

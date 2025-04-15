@@ -10,6 +10,5 @@ import java.util.Set;
 @Data
 public class PlanDTO {
     private String name;
-    @Nullable
     private Set<ResourceDTO> resources;
 }

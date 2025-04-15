@@ -22,7 +22,7 @@ public class FirebaseService {
             return userRecord.getUid();
         } catch (FirebaseAuthException exception) {
             if (exception.getMessage().contains(DUPLICATE_ACCOUNT_ERROR)) {
-                // TODO: Throw custom exception
+                // TODO: Throw custom exception. Extend of RuntimeException
                 throw new Exception("Account with given email-id already exists");
             }
             throw exception;

@@ -33,7 +33,7 @@ public class UserStatusServiceImpl implements UserStatusService {
         if (userStatusEntity.isPresent()){
             return userStatusEntity.get();
         }
-        // TODO: Throw custom exception
+        // TODO: Throw custom exception. Extend of RuntimeException
         throw new Exception();
     }
 }

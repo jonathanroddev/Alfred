@@ -43,7 +43,7 @@ public class CommunityServiceImpl implements CommunityService {
     public CommunityEntity getCommunityEntity(String uuid) throws Exception {
         Optional<CommunityEntity> communityEntity = this.communityRepository.findById(UUID.fromString(uuid));
         if (communityEntity.isEmpty()) {
-            // TODO: Throw custom exception
+            // TODO: Throw custom exception. Extend of RuntimeException
             throw new Exception();
         }
         return communityEntity.get();
@@ -51,6 +51,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public CommunityDTO createCommunity(CommunityDTO communityDTO) throws Exception {
+        // TODO: Handle nullpointer on plan's name
         PlanEntity planEntity = this.planService.getPlanEntity(communityDTO.getPlan().getName());
         CommunityEntity communityEntity = this.communityMapper.toEntity(communityDTO);
         communityEntity.setUuid(UUID.randomUUID());

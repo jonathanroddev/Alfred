@@ -8,4 +8,5 @@ import java.util.List;
 public interface PlanService {
     List<PlanDTO> getAllPlans();
     PlanEntity getPlanEntity(String name) throws Exception;
+    PlanDTO createPlan(PlanDTO planDTO) throws Exception;
 }

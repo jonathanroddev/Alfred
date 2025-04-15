@@ -10,4 +10,5 @@ import java.util.List;
 public interface ResourceMapper {
     ResourceDTO toDTO(ResourceEntity resourceEntity);
     List<ResourceDTO> toDTOList(List<ResourceEntity> resourceEntityList);
+    ResourceEntity toEntity(ResourceDTO resourceDTO);
 }
