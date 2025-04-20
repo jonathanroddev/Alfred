@@ -3,11 +3,10 @@ package com.alfred.backoffice.modules.auth.application.dto.response;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Data
-public class PlanDTO {
+public class UserTypeDTO {
     private String name;
-    private Set<ResourceDTO> resources;
+    private int level;
 }

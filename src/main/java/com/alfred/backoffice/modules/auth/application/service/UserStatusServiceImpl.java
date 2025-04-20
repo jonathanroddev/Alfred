@@ -29,7 +29,7 @@ public class UserStatusServiceImpl implements UserStatusService {
 
     @Override
     public UserStatusEntity getUserStatusEntity(String name) throws Exception {
-        Optional<UserStatusEntity> userStatusEntity = userStatusRepository.findByName(name);
+        Optional<UserStatusEntity> userStatusEntity = userStatusRepository.findById(name);
         if (userStatusEntity.isPresent()){
             return userStatusEntity.get();
         }

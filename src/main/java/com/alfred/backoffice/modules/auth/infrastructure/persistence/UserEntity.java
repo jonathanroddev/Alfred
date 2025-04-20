@@ -18,7 +18,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"external_uuid", "community"})
+        })
 public class UserEntity {
 
     @Id

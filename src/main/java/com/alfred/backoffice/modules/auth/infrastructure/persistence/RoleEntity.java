@@ -17,7 +17,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "roles")
+@Table(name = "roles",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"name", "community"})
+        })
 public class RoleEntity {
 
     @Id

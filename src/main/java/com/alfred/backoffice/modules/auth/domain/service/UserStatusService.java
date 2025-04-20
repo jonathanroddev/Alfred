@@ -4,7 +4,6 @@ import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserStatusService {
     List<UserStatusDTO> getAllUserStatus();

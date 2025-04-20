@@ -156,6 +156,7 @@ CREATE TABLE alfred_v1.users (
     "_created_by" VARCHAR(255) NOT NULL,
 	"_updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"_updated_by" VARCHAR(255) NOT NULL,
+	UNIQUE ("external_uuid", "community"),
 	CONSTRAINT check_empty_created_by CHECK ((TRIM(BOTH FROM _created_by) <> ''::text)),
 	CONSTRAINT check_empty_updated_by CHECK ((TRIM(BOTH FROM _updated_by) <> ''::text))
 );

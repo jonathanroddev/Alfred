@@ -1,6 +1,5 @@
 package com.alfred.backoffice.modules.auth.infrastructure.external.firebase.filter;
 
-import com.alfred.backoffice.modules.auth.application.service.UserServiceImpl;
 import com.alfred.backoffice.modules.auth.domain.model.Role;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
@@ -11,21 +10,16 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -61,12 +55,13 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             /*
             TODO: A way to allow same user for different communities is send the community in headers
              and then filter by it. In that case we need to control the exception that will happen after
-             the first save for a same user.
+             the first save for a same user. Then we should find the user by it's externalUuid and community.
              */
-
-            // TODO: Check user' status
-
-             User user = userService.getUser(token.getUid());
+             User user = userService.getUserByExternalUuid(token.getUid());
+             if(!this.userService.isActive(user)) {
+                 // TODO: Throw custom exception. Extend of RuntimeException
+                 throw new Exception();
+             }
              Set<Role> roles = user.getRoles();
 
             List<GrantedAuthority> alfredPermissionsAuthorities = AuthorityUtils.createAuthorityList(
@@ -77,6 +72,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
                                             permissionRole.getPermission().getOperation().getName()))
                             ).distinct().toArray(String[]::new));
 
+            // TODO: The context must storage the internal UUID
             SecurityContextHolder.getContext()
                     .setAuthentication(
                             new FirebaseAuthenticationToken(idToken, token, alfredPermissionsAuthorities));
