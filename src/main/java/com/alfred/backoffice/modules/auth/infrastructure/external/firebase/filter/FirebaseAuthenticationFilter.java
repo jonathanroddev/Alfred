@@ -11,8 +11,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,6 +33,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        // TODO: Refactor this method due to duplicity in OpenAPIConfig
         List<String> excludes = List.of("public", "signup", "login", "docs", "swagger");
         return excludes.stream().anyMatch(path::contains);
     }
@@ -41,10 +45,17 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
+
         String idToken = request.getHeader("Authorization");
+        String idCommunity = request.getHeader("amg-community");
 
         if (idToken == null || idToken.isEmpty()) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Firebase ID-Token");
+            return;
+        }
+
+        if (idCommunity == null || idCommunity.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Community ID");
             return;
         }
 
@@ -57,12 +68,8 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             FirebaseToken token = firebaseAuth.verifyIdToken(idToken.replace("Bearer ", ""));
 
-            /*
-            TODO: A way to allow same user for different communities is send the community in headers
-             and then filter by it. In that case we need to control the exception that will happen after
-             the first save for a same user. Then we should find the user by it's externalUuid and community.
-             */
-             User user = userService.getUserByExternalUuid(token.getUid());
+            // TODO: Handle exception on find user
+             User user = userService.getUserByExternalUuidAndCommunity(token.getUid(), idCommunity);
              if(!this.userService.isActive(user)) {
                  // TODO: Throw custom exception. Extend of RuntimeException
                  throw new Exception();
@@ -76,15 +83,17 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
                                             permissionRole.getPermission().getResource().getName(),
                                             permissionRole.getPermission().getOperation().getName()))
                             ).distinct().toArray(String[]::new));
+            alfredPermissionsAuthorities.add(new SimpleGrantedAuthority("AUTHENTICATED"));
 
-            // TODO: The context must storage the internal UUID
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, alfredPermissionsAuthorities);
+
             SecurityContextHolder.getContext()
                     .setAuthentication(
-                            new FirebaseAuthenticationToken(idToken, token, alfredPermissionsAuthorities));
-
-            SecurityContextHolder.getContext().getAuthentication().setAuthenticated(true);
+                            authenticationToken
+                    );
 
         } catch (Exception e) {
+            logger.error(e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Firebase ID-Token");
             return;
         }

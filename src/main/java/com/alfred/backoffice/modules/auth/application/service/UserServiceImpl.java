@@ -57,8 +57,7 @@ public class UserServiceImpl implements UserService {
 
     @SneakyThrows
     public boolean hasAuth(Authentication authentication, int level) {
-        User user = this.getUserByExternalUuid((String) authentication.getPrincipal());
-        return this.hasLevel(user, level);
+        return this.hasLevel((User) authentication.getPrincipal(), level);
     }
 
     @Override
@@ -111,8 +110,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User getUserByExternalUuid(String externalUuid) throws Exception {
-        Optional<UserEntity> userEntity = userRepository.findByExternalUuid(externalUuid);
+    public User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws Exception {
+        // TODO: Handle exceptions on UUID
+        Optional<UserEntity> userEntity = userRepository.findByExternalUuidAndCommunityUuid(externalUuid, UUID.fromString(communityId));
         if (userEntity.isPresent()){
             return userMapper.toModel(userEntity.get());
         }
@@ -122,8 +122,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication) throws Exception {
-        User user = this.getUserByExternalUuid(authentication.getPrincipal().toString());
-        return userTypeService.getAllUserTypesFilterByUser(user);
+        return userTypeService.getAllUserTypesFilterByUser((User) authentication.getPrincipal());
     }
 
     private boolean isAdmin(User user) {
@@ -161,7 +160,7 @@ public class UserServiceImpl implements UserService {
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
         UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
         User user = userMapper.toModel(userEntity);
-        User manager = this.getUserByExternalUuid((String) authentication.getPrincipal());
+        User manager = (User) authentication.getPrincipal();
         // Check if manager can perform action over user
         this.canPerform(manager, user);
         // Check that the level of the user type to set is higher than the lowest of the manager

@@ -22,6 +22,8 @@ public class SecurityConfig {
     private final FirebaseAuthenticationFilter firebaseAuthenticationFilter;
     public static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+    // TODO: Define security politics
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

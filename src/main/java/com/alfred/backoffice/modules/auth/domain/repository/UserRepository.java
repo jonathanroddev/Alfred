@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
-    // TODO: Remove this because it has to return a list instead of a single record
-    Optional<UserEntity> findByExternalUuid(String externalUuid);
+    Optional<UserEntity> findByExternalUuidAndCommunityUuid(String externalUuid, UUID communityId);
     List<UserEntity> findAllByExternalUuid(String externalUuid);
 }

@@ -22,7 +22,7 @@ public interface UserService {
     void createUser(UserSignup userSignup) throws Exception;
     UserEntity getUserEntity(UUID uuid) throws Exception;
     User getUser(UUID uuid);
-    User getUserByExternalUuid(String externalUuid) throws Exception;
+    User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws Exception;
     List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication) throws Exception;
     void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws Exception;
     void addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws Exception;
