@@ -1,5 +1,6 @@
 package com.alfred.backoffice.modules.auth.application.controller;
 
+import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.application.dto.response.*;
 import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 // TODO: use @RestControllerAdvice
@@ -29,7 +31,14 @@ public class WriteAuthController {
     @PostMapping(path = "/signup")
     @Tag(name = "Access")
     void createUser(@RequestBody UserSignup userSignup) {
+        // TODO: Consider return something
         this.userService.signup(userSignup);
+    }
+
+    @PostMapping(path = "/login")
+    @Tag(name = "Access")
+    UserLoginResponse login(@RequestBody UserLogin userLogin) throws Exception {
+        return this.userService.login(userLogin);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")

@@ -30,7 +30,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        List<String> excludes = List.of("public", "signup", "docs", "swagger");
+        List<String> excludes = List.of("public", "signup", "login", "docs", "swagger");
         return excludes.stream().anyMatch(path::contains);
     }
 
@@ -49,6 +49,11 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
+            /*
+            TODO: Check https://www.baeldung.com/spring-security-firebase-authentication#exchanging-refresh-tokens-for-new-id-tokens
+            to see if it's better exchange refresh rather than id token
+             */
+
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             FirebaseToken token = firebaseAuth.verifyIdToken(idToken.replace("Bearer ", ""));
 

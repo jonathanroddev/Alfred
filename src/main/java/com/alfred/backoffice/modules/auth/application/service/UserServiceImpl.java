@@ -2,7 +2,9 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserMapper;
+import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
+import com.alfred.backoffice.modules.auth.application.dto.response.UserLoginResponse;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
 import com.alfred.backoffice.modules.auth.domain.model.User;
@@ -13,6 +15,7 @@ import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.domain.service.UserStatusService;
 import com.alfred.backoffice.modules.auth.domain.service.UserTypeService;
+import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInResponse;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.service.FirebaseService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
@@ -53,14 +56,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @SneakyThrows
-    public boolean hasLevel(Authentication authentication, int level) {
-        return this.hasLevel(this.getUserByExternalUuid(authentication.getPrincipal().toString()), level);
-    }
-
-    @SneakyThrows
     public boolean hasAuth(Authentication authentication, int level) {
         User user = this.getUserByExternalUuid((String) authentication.getPrincipal());
         return this.hasLevel(user, level);
+    }
+
+    @Override
+    public UserLoginResponse login(UserLogin userLogin) throws Exception {
+        FirebaseSignInResponse firebaseSignInResponse = this.firebaseService.login(userLogin.getEmail(), userLogin.getPassword());
+        List<User> users = this.userMapper.toModelList(this.userRepository.findAllByExternalUuid(firebaseSignInResponse.getLocalId()));
+        return new UserLoginResponse(firebaseSignInResponse, users);
     }
 
     // Method used by Alfred's team
@@ -121,16 +126,6 @@ public class UserServiceImpl implements UserService {
         return userTypeService.getAllUserTypesFilterByUser(user);
     }
 
-    @Transactional
-    @Override
-    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws Exception {
-        // TODO: Handle UUID.fromString exceptions in all project
-        UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
-        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
-        userEntity.setUserStatus(userStatusEntity);
-        this.userRepository.save(userEntity);
-    }
-
     private boolean isAdmin(User user) {
         return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= 0);
     }
@@ -150,6 +145,16 @@ public class UserServiceImpl implements UserService {
             // TODO: Handle throw custom exception. Extend of RuntimeException
             throw new Exception();
         }
+    }
+
+    @Transactional
+    @Override
+    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws Exception {
+        // TODO: Handle UUID.fromString exceptions in all project
+        UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
+        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
+        userEntity.setUserStatus(userStatusEntity);
+        this.userRepository.save(userEntity);
     }
 
     private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws Exception {
