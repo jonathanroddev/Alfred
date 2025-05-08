@@ -43,7 +43,6 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     public PlanDTO createPlan(PlanDTO planDTO) throws NotFoundException {
-        // TODO: Handle at least one resource
         Set<ResourceEntity> resourceEntities = planDTO.getResources().stream().map(resourceDTO -> {
             return this.resourceService.getResourceEntity(resourceDTO.getName());
         }).collect(Collectors.toSet());

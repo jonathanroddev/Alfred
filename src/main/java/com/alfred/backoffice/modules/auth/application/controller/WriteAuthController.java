@@ -8,6 +8,7 @@ import com.alfred.backoffice.modules.auth.domain.service.PlanService;
 import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,14 +65,14 @@ public class WriteAuthController {
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
     @PostMapping(path = "/communities")
     @Tag(name = "Communities")
-    CommunityDTO createCommunity(@RequestBody CommunityDTO communityDTO) throws Exception {
+    CommunityDTO createCommunity(@RequestBody @Valid CommunityDTO communityDTO) throws Exception {
         return this.communityService.createCommunity(communityDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
     @PostMapping(path = "/plans")
     @Tag(name = "Plans")
-    PlanDTO createPlan(@RequestBody PlanDTO planDTO) throws Exception {
+    PlanDTO createPlan(@RequestBody @Valid PlanDTO planDTO) throws Exception {
         return this.planService.createPlan(planDTO);
     }
 

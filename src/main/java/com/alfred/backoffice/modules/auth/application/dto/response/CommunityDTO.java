@@ -1,5 +1,6 @@
 package com.alfred.backoffice.modules.auth.application.dto.response;
 
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -11,5 +12,6 @@ public class CommunityDTO {
     @Nullable
     private String uuid;
     private String name;
+    @Valid
     private PlanDTO plan;
 }

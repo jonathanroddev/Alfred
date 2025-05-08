@@ -25,7 +25,6 @@ public class OpenAPIConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        // TODO: Set amg-community header as required
         return new OpenAPI().addSecurityItem(new SecurityRequirement().
                         addList("Bearer Authentication"))
                 .components(new Components()
@@ -54,7 +53,7 @@ public class OpenAPIConfig {
                                 .in("header")
                                 .name("amg-community")
                                 .description("Community UUID")
-                                .required(false)
+                                .required(true)
                                 .schema(new StringSchema());
                         operation.addParametersItem(customHeader);
                     });

@@ -50,7 +50,6 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public CommunityDTO createCommunity(CommunityDTO communityDTO) throws NotFoundException {
-        // TODO: Handle nullpointer on plan's name
         PlanEntity planEntity = this.planService.getPlanEntity(communityDTO.getPlan().getName());
         CommunityEntity communityEntity = this.communityMapper.toEntity(communityDTO);
         communityEntity.setUuid(UUID.randomUUID());

@@ -2,10 +2,13 @@ package com.alfred.backoffice.modules.auth.application.handler;
 
 import com.alfred.backoffice.modules.auth.domain.exception.ApiException;
 import com.alfred.backoffice.modules.auth.infrastructure.configuration.ErrorMessageProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -24,6 +27,23 @@ public class ApiExceptionHandler {
 
         return ResponseEntity
                 .status(ex.getHttpStatus())
+                .body(Map.of(
+                        "code", code,
+                        "message", message
+                ));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        // TODO: Refactor this due to duplicity
+        Map<String, String> errors = new HashMap<>();
+
+        String code = ex.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
+        String message = errorMessages.getMessage(code);
+
+        assert code != null;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "code", code,
                         "message", message
