@@ -4,6 +4,7 @@ import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper
 import com.alfred.backoffice.modules.auth.application.dto.mapper.PlanMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
 import com.alfred.backoffice.modules.auth.domain.model.Community;
 import com.alfred.backoffice.modules.auth.domain.repository.CommunityRepository;
 import com.alfred.backoffice.modules.auth.domain.repository.PlanRepository;
@@ -33,24 +34,22 @@ public class CommunityServiceImpl implements CommunityService {
         return communityMapper.toDTOList(communityEntityList);
     }
 
-    @SneakyThrows
     @Override
-    public Community getCommunity(String uuid) {
+    public Community getCommunity(String uuid) throws NotFoundException {
         return communityMapper.toModel(this.getCommunityEntity(uuid));
     }
 
     @Override
-    public CommunityEntity getCommunityEntity(String uuid) throws Exception {
+    public CommunityEntity getCommunityEntity(String uuid) throws NotFoundException {
         Optional<CommunityEntity> communityEntity = this.communityRepository.findById(UUID.fromString(uuid));
         if (communityEntity.isEmpty()) {
-            // TODO: Throw custom exception. Extend of RuntimeException
-            throw new Exception();
+            throw new NotFoundException("amg-404_3");
         }
         return communityEntity.get();
     }
 
     @Override
-    public CommunityDTO createCommunity(CommunityDTO communityDTO) throws Exception {
+    public CommunityDTO createCommunity(CommunityDTO communityDTO) throws NotFoundException {
         // TODO: Handle nullpointer on plan's name
         PlanEntity planEntity = this.planService.getPlanEntity(communityDTO.getPlan().getName());
         CommunityEntity communityEntity = this.communityMapper.toEntity(communityDTO);

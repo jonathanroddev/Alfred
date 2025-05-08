@@ -1,10 +1,16 @@
 package com.alfred.backoffice.modules.auth.infrastructure.external.firebase.service;
 
+import com.alfred.backoffice.modules.auth.domain.exception.BadGatewayException;
+import com.alfred.backoffice.modules.auth.domain.exception.BadRequestException;
+import com.alfred.backoffice.modules.auth.domain.exception.ConflictException;
+import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.configuration.FirebaseConfig;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInRequest;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -15,8 +21,9 @@ import org.springframework.web.client.RestClient;
 public class FirebaseService {
 
     private static final String DUPLICATE_ACCOUNT_ERROR = "EMAIL_EXISTS";
+    private static final Logger log =  LoggerFactory.getLogger(FirebaseService.class);
 
-    public String createUser(String emailId, String password) throws Exception {
+    public String createUser(String emailId, String password) throws ConflictException, BadGatewayException {
         UserRecord.CreateRequest request = new UserRecord.CreateRequest();
         request.setEmail(emailId);
         request.setPassword(password);
@@ -28,10 +35,10 @@ public class FirebaseService {
             return userRecord.getUid();
         } catch (FirebaseAuthException exception) {
             if (exception.getMessage().contains(DUPLICATE_ACCOUNT_ERROR)) {
-                // TODO: Throw custom exception. Extend of RuntimeException
-                throw new Exception("Account with given email-id already exists");
+                throw new ConflictException("amg-409_1");
             }
-            throw exception;
+            log.error("Firebase auth sign up error", exception);
+            throw new BadGatewayException("amg-502_1");
         }
     }
 
@@ -42,12 +49,12 @@ public class FirebaseService {
     @Value("${firebase.api-key}")
     private String webApiKey;
 
-    public FirebaseSignInResponse login(String emailId, String password) throws Exception {
+    public FirebaseSignInResponse login(String emailId, String password) throws BadRequestException, BadGatewayException {
         FirebaseSignInRequest requestBody = new FirebaseSignInRequest(emailId, password, true);
         return this.sendSignInRequest(requestBody);
     }
 
-    private FirebaseSignInResponse sendSignInRequest(FirebaseSignInRequest firebaseSignInRequest) throws Exception {
+    private FirebaseSignInResponse sendSignInRequest(FirebaseSignInRequest firebaseSignInRequest) throws BadRequestException, BadGatewayException {
         try {
             return RestClient.create(SIGN_IN_BASE_URL)
                     .post()
@@ -60,10 +67,10 @@ public class FirebaseService {
                     .body(FirebaseSignInResponse.class);
         } catch (HttpClientErrorException exception) {
             if (exception.getResponseBodyAsString().contains(INVALID_CREDENTIALS_ERROR)) {
-                // TODO: Throw custom exception. Extend of RuntimeException
-                throw new Exception();
+                throw new BadRequestException("amg-400_1");
             }
-            throw exception;
+            log.error("Firebase auth login error", exception);
+            throw new BadGatewayException("amg-502_2");
         }
     }
 }

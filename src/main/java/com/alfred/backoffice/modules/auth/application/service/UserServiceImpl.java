@@ -7,6 +7,7 @@ import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserLoginResponse;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.*;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.model.UserType;
 import com.alfred.backoffice.modules.auth.domain.repository.UserRepository;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserLoginResponse login(UserLogin userLogin) throws Exception {
+    public UserLoginResponse login(UserLogin userLogin) throws BadRequestException, BadGatewayException {
         FirebaseSignInResponse firebaseSignInResponse = this.firebaseService.login(userLogin.getEmail(), userLogin.getPassword());
         List<User> users = this.userMapper.toModelList(this.userRepository.findAllByExternalUuid(firebaseSignInResponse.getLocalId()));
         return new UserLoginResponse(firebaseSignInResponse, users);
@@ -77,7 +78,7 @@ public class UserServiceImpl implements UserService {
     // TODO: Create method for massive signup for managers. Example: List<String> mails | Getting the community by SecurityContextHolder
 
     @Override
-    public void createUser(UserSignup userSignup) throws Exception {
+    public void createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException {
         CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
         // TODO: Handle exception on duplicate in Firebase to check if exists with same community in Alfred
         String externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
@@ -93,13 +94,12 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserEntity getUserEntity(UUID uuid) throws Exception {
+    public UserEntity getUserEntity(UUID uuid) throws NotFoundException {
         Optional<UserEntity> userEntity =  userRepository.findById(uuid);
         if (userEntity.isPresent()){
             return userEntity.get();
         }
-        // TODO: Handle throw custom exception. Extend of RuntimeException
-        throw new Exception();
+        throw new NotFoundException("amg-404_1");
     }
 
     @SneakyThrows
@@ -110,18 +110,17 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws Exception {
+    public User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException {
         // TODO: Handle exceptions on UUID
         Optional<UserEntity> userEntity = userRepository.findByExternalUuidAndCommunityUuid(externalUuid, UUID.fromString(communityId));
         if (userEntity.isPresent()){
             return userMapper.toModel(userEntity.get());
         }
-        // TODO: Handle throw custom exception. Extend of RuntimeException
-        throw new Exception();
+        throw new NotFoundException("amg-404_1");
     }
 
     @Override
-    public List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication) throws Exception {
+    public List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication) {
         return userTypeService.getAllUserTypesFilterByUser((User) authentication.getPrincipal());
     }
 
@@ -129,7 +128,7 @@ public class UserServiceImpl implements UserService {
         return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= 0);
     }
 
-    private boolean shareCommunity(User manager, User user) {
+    private boolean shareCommunity(User manager, User user) throws NotFoundException{
         return Objects.equals(manager.getCommunity(), user.getCommunity());
     }
 
@@ -139,16 +138,15 @@ public class UserServiceImpl implements UserService {
         return managerMinUserType.getLevel() < userMinUserType.getLevel();
     }
 
-    private void canPerform(User manager, User user) throws Exception {
+    private void canPerform(User manager, User user) throws NotFoundException, ForbiddenException {
         if (!this.isAdmin(manager) && (!this.shareCommunity(manager, user) || !this.isOverUser(manager, user))) {
-            // TODO: Handle throw custom exception. Extend of RuntimeException
-            throw new Exception();
+            throw new ForbiddenException("amg-403_1");
         }
     }
 
     @Transactional
     @Override
-    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws Exception {
+    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException {
         // TODO: Handle UUID.fromString exceptions in all project
         UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
         UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
@@ -156,7 +154,7 @@ public class UserServiceImpl implements UserService {
         this.userRepository.save(userEntity);
     }
 
-    private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws Exception {
+    private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
         UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
         User user = userMapper.toModel(userEntity);
@@ -167,13 +165,13 @@ public class UserServiceImpl implements UserService {
         UserType managerMinUserType = manager.getUserTypes().stream().min(Comparator.comparingInt(UserType::getLevel)).get();
         if (userTypeEntity.getLevel() <= managerMinUserType.getLevel()) {
             // TODO: Handle throw custom exception. Extend of RuntimeException
-            throw new Exception();
+            throw new ForbiddenException("amg-403_2");
         }
         return userEntity;
     }
 
     @Override
-    public void addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws Exception {
+    public void addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
@@ -185,7 +183,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws Exception {
+    public void deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());

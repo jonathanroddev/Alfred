@@ -25,6 +25,7 @@ public class OpenAPIConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        // TODO: Set amg-community header as required
         return new OpenAPI().addSecurityItem(new SecurityRequirement().
                         addList("Bearer Authentication"))
                 .components(new Components()

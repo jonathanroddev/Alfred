@@ -2,6 +2,7 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.PlanMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
 import com.alfred.backoffice.modules.auth.domain.repository.PlanRepository;
 import com.alfred.backoffice.modules.auth.domain.service.PlanService;
 import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
@@ -32,24 +33,19 @@ public class PlanServiceImpl implements PlanService {
 
     @Transactional
     @Override
-    public PlanEntity getPlanEntity(String name) throws Exception {
+    public PlanEntity getPlanEntity(String name) throws NotFoundException {
         Optional<PlanEntity> planEntity =  planRepository.findById(name);
         if (planEntity.isPresent()){
             return planEntity.get();
         }
-        // TODO: Handle throw custom exception. Extend of RuntimeException
-        throw new Exception();
+        throw new NotFoundException("amg-404_5");
     }
 
     @Override
-    public PlanDTO createPlan(PlanDTO planDTO) throws Exception {
+    public PlanDTO createPlan(PlanDTO planDTO) throws NotFoundException {
         // TODO: Handle at least one resource
         Set<ResourceEntity> resourceEntities = planDTO.getResources().stream().map(resourceDTO -> {
-            try {
-                return this.resourceService.getResourceEntity(resourceDTO.getName());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return this.resourceService.getResourceEntity(resourceDTO.getName());
         }).collect(Collectors.toSet());
         PlanEntity planEntity = new PlanEntity(planDTO.getName(), resourceEntities);
         this.planRepository.save(planEntity);

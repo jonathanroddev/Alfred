@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-// TODO: use @RestControllerAdvice
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.v1.path}")

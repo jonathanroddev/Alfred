@@ -2,6 +2,7 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.ResourceMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.ResourceDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
 import com.alfred.backoffice.modules.auth.domain.repository.ResourceRepository;
 import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.ResourceEntity;
@@ -27,17 +28,17 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Transactional
     @Override
-    public ResourceEntity getResourceEntity(String name) throws Exception {
+    public ResourceEntity getResourceEntity(String name) throws NotFoundException {
         Optional<ResourceEntity> resourceEntity =  resourceRepository.findById(name);
         if (resourceEntity.isPresent()){
             return resourceEntity.get();
         }
-        // TODO: Handle throw custom exception. Extend of RuntimeException
-        throw new Exception();
+        throw new NotFoundException("amg-404_2");
     }
 
     @Override
     public ResourceDTO createResource(ResourceDTO resourceDTO) throws Exception {
+        // TODO: Handle duplicate entry exception and send an Unprocessable Entity one
         this.resourceRepository.save(this.resourceMapper.toEntity(resourceDTO));
         return resourceDTO;
     }

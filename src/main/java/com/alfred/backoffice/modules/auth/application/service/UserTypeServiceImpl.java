@@ -4,6 +4,7 @@ import com.alfred.backoffice.modules.auth.application.dto.mapper.UserStatusMappe
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserTypeMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.model.UserType;
 import com.alfred.backoffice.modules.auth.domain.repository.UserStatusRepository;
@@ -34,19 +35,18 @@ public class UserTypeServiceImpl implements UserTypeService {
     }
 
     @Override
-    public List<UserTypeDTO> getAllUserTypesFilterByUser(User user) throws Exception {
+    public List<UserTypeDTO> getAllUserTypesFilterByUser(User user) {
         UserType userMinUserType = user.getUserTypes().stream().min(Comparator.comparingInt(UserType::getLevel)).get();
         List<UserTypeEntity> userStatusEntities = userTypeRepository.findByLevelGreaterThanEqual(userMinUserType.getLevel());
         return userTypeMapper.toDTOList(userStatusEntities);
     }
 
     @Override
-    public UserTypeEntity getUserTypeEntity(String name) throws Exception {
+    public UserTypeEntity getUserTypeEntity(String name) throws NotFoundException {
         Optional<UserTypeEntity> userTypeEntity = userTypeRepository.findById(name);
         if (userTypeEntity.isPresent()){
             return userTypeEntity.get();
         }
-        // TODO: Throw custom exception. Extend of RuntimeException
-        throw new Exception();
+        throw new NotFoundException("amg-404_4");
     }
 }
