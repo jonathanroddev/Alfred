@@ -20,33 +20,27 @@ public class ApiExceptionHandler {
         this.errorMessages = errorMessages;
     }
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<Map<String, String>> handleApiException(ApiException ex) {
-        String code = ex.getCode();
-        String message = errorMessages.getMessage(code);
-
+    private ResponseEntity<Map<String, String>> getAlfredResponseEntity(HttpStatus httpStatus, String code, String message) {
         return ResponseEntity
-                .status(ex.getHttpStatus())
+                .status(httpStatus)
                 .body(Map.of(
                         "code", code,
                         "message", message
                 ));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        // TODO: Refactor this due to duplicity
-        Map<String, String> errors = new HashMap<>();
-
-        String code = ex.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<Map<String, String>> handleApiException(ApiException ex) {
+        String code = ex.getCode();
         String message = errorMessages.getMessage(code);
+        return this.getAlfredResponseEntity(ex.getHttpStatus(), code, message);
+    }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String code = ex.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
         assert code != null;
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "code", code,
-                        "message", message
-                ));
+        String message = errorMessages.getMessage(code);
+        return this.getAlfredResponseEntity(HttpStatus.BAD_REQUEST, code, message);
     }
 }

@@ -8,6 +8,7 @@ import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.infrastructure.configuration.ErrorMessageProperties;
 import com.alfred.backoffice.modules.auth.infrastructure.privacy.PrivacyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -43,6 +44,13 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return this.privacyService.isUnrestrictedPath(path);
+    }
+
+    private String getBodyException(String code, String message) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(Map.of(
+                "code", code,
+                "message", message
+        ));
     }
 
     @Override
@@ -85,33 +93,22 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (ApiException ex) {
-            // TODO: Refactor this catch because duplicity
+            logger.error(ex);
             String code = ex.getCode();
             String message = errorMessageProperties.getMessage(code);
 
             response.setStatus(ex.getHttpStatus().value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-            String body = new ObjectMapper().writeValueAsString(Map.of(
-                    "code", code,
-                    "message", message
-            ));
-            response.getWriter().write(body);
+            response.getWriter().write(this.getBodyException(code, message));
             return;
         } catch (FirebaseAuthException fbe) {
-            // TODO: Refactor this catch due to duplicity
             logger.error(fbe);
             String code = "amg-401_4";
             String message = errorMessageProperties.getMessage(code);
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-            String body = new ObjectMapper().writeValueAsString(Map.of(
-                    "code", code,
-                    "message", message
-            ));
-            response.getWriter().write(body);
+            response.getWriter().write(this.getBodyException(code, message));
             return;
         } catch (Exception e) {
             logger.error(e);
