@@ -7,6 +7,7 @@ import com.alfred.backoffice.modules.auth.domain.model.Role;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.infrastructure.configuration.ErrorMessageProperties;
+import com.alfred.backoffice.modules.auth.infrastructure.privacy.PrivacyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -36,13 +37,12 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserService userService;
     private final ErrorMessageProperties errorMessageProperties;
+    private final PrivacyService privacyService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // TODO: Refactor this method due to duplicity in OpenAPIConfig
-        List<String> excludes = List.of("public", "signup", "login", "docs", "swagger");
-        return excludes.stream().anyMatch(path::contains);
+        return this.privacyService.isUnrestrictedPath(path);
     }
 
     @Override

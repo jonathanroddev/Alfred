@@ -3,7 +3,6 @@ package com.alfred.backoffice.modules.auth.infrastructure.external.firebase.serv
 import com.alfred.backoffice.modules.auth.domain.exception.BadGatewayException;
 import com.alfred.backoffice.modules.auth.domain.exception.BadRequestException;
 import com.alfred.backoffice.modules.auth.domain.exception.ConflictException;
-import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.configuration.FirebaseConfig;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInRequest;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInResponse;
 import com.google.firebase.auth.FirebaseAuth;

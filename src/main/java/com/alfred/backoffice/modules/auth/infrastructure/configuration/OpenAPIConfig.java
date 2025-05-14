@@ -1,5 +1,6 @@
 package com.alfred.backoffice.modules.auth.infrastructure.configuration;
 
+import com.alfred.backoffice.modules.auth.infrastructure.privacy.PrivacyService;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
@@ -9,14 +10,18 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Configuration
 public class OpenAPIConfig {
+    private final PrivacyService privacyService;
+
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme().type(SecurityScheme.Type.HTTP)
                 .bearerFormat("JWT")
@@ -36,18 +41,11 @@ public class OpenAPIConfig {
                                 .email("alfredmgconfig@gmail.com").url("https://github.com/Alfred-Manager")));
     }
 
-    protected boolean shouldNotAddHeader(String path) {
-        // TODO: Refactor this method due to duplicity in FirebaseAuthenticationFilter
-        // TODO: Define this list as constant
-        List<String> excludes = List.of("public", "signup", "login", "docs", "swagger");
-        return excludes.stream().anyMatch(path::contains);
-    }
-
     @Bean
     public OpenApiCustomizer customHeaderOpenApiCustomizer() {
         return openApi -> {
             openApi.getPaths().forEach((path, pathItem) -> {
-                if (!this.shouldNotAddHeader(path)) {
+                if (!this.privacyService.isUnrestrictedPath(path)) {
                     pathItem.readOperations().forEach(operation -> {
                         Parameter customHeader = new Parameter()
                                 .in("header")
