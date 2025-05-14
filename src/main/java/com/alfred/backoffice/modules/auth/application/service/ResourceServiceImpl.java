@@ -38,7 +38,6 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public ResourceDTO createResource(ResourceDTO resourceDTO) throws Exception {
-        // TODO: Handle duplicate entry exception and send an Unprocessable Entity one
         this.resourceRepository.save(this.resourceMapper.toEntity(resourceDTO));
         return resourceDTO;
     }

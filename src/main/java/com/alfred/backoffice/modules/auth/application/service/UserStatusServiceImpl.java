@@ -3,6 +3,7 @@ package com.alfred.backoffice.modules.auth.application.service;
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserStatusMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
+import com.alfred.backoffice.modules.auth.domain.model.UserStatus;
 import com.alfred.backoffice.modules.auth.domain.repository.UserStatusRepository;
 import com.alfred.backoffice.modules.auth.domain.service.UserStatusService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusEntity;
@@ -32,5 +33,10 @@ public class UserStatusServiceImpl implements UserStatusService {
             return userStatusEntity.get();
         }
         throw new NotFoundException("amg-404_6");
+    }
+
+    @Override
+    public UserStatus getUserStatus(String name) throws NotFoundException {
+        return this.userStatusMapper.toModel(this.getUserStatusEntity(name));
     }
 }

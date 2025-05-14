@@ -27,9 +27,8 @@ public class WriteAuthController {
 
     @PostMapping(path = "/signup")
     @Tag(name = "Access")
-    void createUser(@RequestBody UserSignup userSignup) {
-        // TODO: Consider return something
-        this.userService.signup(userSignup);
+    UserDTO createUser(@RequestBody UserSignup userSignup) {
+        return this.userService.signup(userSignup);
     }
 
     @PostMapping(path = "/login")
@@ -41,25 +40,22 @@ public class WriteAuthController {
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
     @PutMapping(path = "/user/{userId}/user-status")
     @Tag(name = "User")
-    void updateStatusOfUser(@RequestBody UserStatusDTO userStatusDTO, @PathVariable String userId) throws Exception {
-        // TODO: Consider return something
-        this.userService.updateStatusOfUser(userId, userStatusDTO);
+    UserDTO updateStatusOfUser(@RequestBody UserStatusDTO userStatusDTO, @PathVariable String userId) throws Exception {
+        return this.userService.updateStatusOfUser(userId, userStatusDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/user/{userId}/user-types")
     @Tag(name = "User")
-    void addTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
-        // TODO: Consider return something
-        this.userService.addTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
+    UserDTO addTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
+        return this.userService.addTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @DeleteMapping(path = "/user/{userId}/user-types")
     @Tag(name = "User")
-    void deleteTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
-        // TODO: Consider return something
-        this.userService.deleteTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
+    UserDTO deleteTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
+        return this.userService.deleteTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")

@@ -38,13 +38,13 @@ public class OpenAPIConfig {
 
     protected boolean shouldNotAddHeader(String path) {
         // TODO: Refactor this method due to duplicity in FirebaseAuthenticationFilter
+        // TODO: Define this list as constant
         List<String> excludes = List.of("public", "signup", "login", "docs", "swagger");
         return excludes.stream().anyMatch(path::contains);
     }
 
     @Bean
     public OpenApiCustomizer customHeaderOpenApiCustomizer() {
-        // TODO: Define this list as constant
         return openApi -> {
             openApi.getPaths().forEach((path, pathItem) -> {
                 if (!this.shouldNotAddHeader(path)) {

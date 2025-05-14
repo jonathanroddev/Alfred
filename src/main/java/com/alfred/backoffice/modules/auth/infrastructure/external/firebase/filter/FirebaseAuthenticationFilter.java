@@ -141,7 +141,6 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         return token;
     }
 
-    // TODO: Check if this is necessary because we don't use authorities from Firebase
     private static List<GrantedAuthority> getAuthoritiesFromToken(FirebaseToken token) {
         Object claims = token.getClaims().get("authorities");
         List<String> permissions = (List<String>) claims;

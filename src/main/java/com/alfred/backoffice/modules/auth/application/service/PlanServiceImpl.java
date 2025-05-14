@@ -3,6 +3,7 @@ package com.alfred.backoffice.modules.auth.application.service;
 import com.alfred.backoffice.modules.auth.application.dto.mapper.PlanMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
 import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
+import com.alfred.backoffice.modules.auth.domain.exception.UnprocessableEntityException;
 import com.alfred.backoffice.modules.auth.domain.repository.PlanRepository;
 import com.alfred.backoffice.modules.auth.domain.service.PlanService;
 import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
@@ -42,7 +43,11 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public PlanDTO createPlan(PlanDTO planDTO) throws NotFoundException {
+    public PlanDTO createPlan(PlanDTO planDTO) throws NotFoundException, UnprocessableEntityException {
+        Optional<PlanEntity> oldPlan = this.planRepository.findById(planDTO.getName());
+        if (oldPlan.isPresent()) {
+            throw new UnprocessableEntityException("amg-422_2");
+        }
         Set<ResourceEntity> resourceEntities = planDTO.getResources().stream().map(resourceDTO -> {
             return this.resourceService.getResourceEntity(resourceDTO.getName());
         }).collect(Collectors.toSet());

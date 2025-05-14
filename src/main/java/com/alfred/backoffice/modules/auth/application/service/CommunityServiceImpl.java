@@ -1,19 +1,16 @@
 package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
-import com.alfred.backoffice.modules.auth.application.dto.mapper.PlanMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.PlanDTO;
 import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
+import com.alfred.backoffice.modules.auth.domain.exception.UnprocessableEntityException;
 import com.alfred.backoffice.modules.auth.domain.model.Community;
 import com.alfred.backoffice.modules.auth.domain.repository.CommunityRepository;
-import com.alfred.backoffice.modules.auth.domain.repository.PlanRepository;
 import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.PlanService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.PlanEntity;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,7 +46,11 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public CommunityDTO createCommunity(CommunityDTO communityDTO) throws NotFoundException {
+    public CommunityDTO createCommunity(CommunityDTO communityDTO) throws NotFoundException, UnprocessableEntityException {
+        Optional<CommunityEntity> oldCommunityEntity = this.communityRepository.findByName(communityDTO.getName());
+        if (oldCommunityEntity.isPresent()) {
+            throw new UnprocessableEntityException("amg-422_1");
+        }
         PlanEntity planEntity = this.planService.getPlanEntity(communityDTO.getPlan().getName());
         CommunityEntity communityEntity = this.communityMapper.toEntity(communityDTO);
         communityEntity.setUuid(UUID.randomUUID());

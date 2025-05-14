@@ -4,6 +4,7 @@ import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserMapper;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
+import com.alfred.backoffice.modules.auth.application.dto.response.UserDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserLoginResponse;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
 import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
@@ -11,7 +12,6 @@ import com.alfred.backoffice.modules.auth.domain.exception.*;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.model.UserType;
 import com.alfred.backoffice.modules.auth.domain.repository.UserRepository;
-import com.alfred.backoffice.modules.auth.domain.repository.UserStatusRepository;
 import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.domain.service.UserStatusService;
@@ -34,14 +34,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    // TODO: Consider to call to CommunityService, UserStatusService instead of their mapper and repository
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final FirebaseService firebaseService;
     private final CommunityMapper communityMapper;
     private final CommunityService communityService;
-    private final UserStatusRepository userStatusRepository;
     private final UserStatusService userStatusService;
     private final UserTypeService userTypeService;
 
@@ -64,32 +62,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserLoginResponse login(UserLogin userLogin) throws BadRequestException, BadGatewayException {
         FirebaseSignInResponse firebaseSignInResponse = this.firebaseService.login(userLogin.getEmail(), userLogin.getPassword());
-        List<User> users = this.userMapper.toModelList(this.userRepository.findAllByExternalUuid(firebaseSignInResponse.getLocalId()));
+        List<UserDTO> users = this.userMapper.toDTOList(this.userRepository.findAllByExternalUuid(firebaseSignInResponse.getLocalId()));
         return new UserLoginResponse(firebaseSignInResponse, users);
     }
 
     // Method used by Alfred's team
     @SneakyThrows
     @Override
-    public void signup(UserSignup userSignup){
-       this.createUser(userSignup);
+    public UserDTO signup(UserSignup userSignup){
+       return this.createUser(userSignup);
     }
 
     // TODO: Create method for massive signup for managers. Example: List<String> mails | Getting the community by SecurityContextHolder
 
     @Override
-    public void createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException {
+    public UserDTO createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException {
         CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
         // TODO: Handle exception on duplicate in Firebase to check if exists with same community in Alfred
         String externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
-        Optional<UserStatusEntity> userStatusEntity = userStatusRepository.findById("pending");
-        if (userStatusEntity.isPresent()) {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setExternalUuid(externalUuid);
-            userEntity.setCommunity(communityEntity);
-            userEntity.setUserStatus(userStatusEntity.get());
-            userRepository.save(userEntity);
-        }
+        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity("pending");
+        UserEntity userEntity = new UserEntity();
+        userEntity.setExternalUuid(externalUuid);
+        userEntity.setCommunity(communityEntity);
+        userEntity.setUserStatus(userStatusEntity);
+        userRepository.save(userEntity);
+        return this.userMapper.toDTO(userEntity);
     }
 
     @Transactional
@@ -146,12 +143,13 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException {
+    public UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException {
         // TODO: Handle UUID.fromString exceptions in all project
         UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
         UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
         userEntity.setUserStatus(userStatusEntity);
         this.userRepository.save(userEntity);
+        return this.userMapper.toDTO(userEntity);
     }
 
     private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
@@ -164,14 +162,13 @@ public class UserServiceImpl implements UserService {
         // Check that the level of the user type to set is higher than the lowest of the manager
         UserType managerMinUserType = manager.getUserTypes().stream().min(Comparator.comparingInt(UserType::getLevel)).get();
         if (userTypeEntity.getLevel() <= managerMinUserType.getLevel()) {
-            // TODO: Handle throw custom exception. Extend of RuntimeException
             throw new ForbiddenException("amg-403_2");
         }
         return userEntity;
     }
 
     @Override
-    public void addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
+    public UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
@@ -180,10 +177,11 @@ public class UserServiceImpl implements UserService {
             userEntity.setUserTypes(userTypes);
             userRepository.save(userEntity);
         }
+        return this.userMapper.toDTO(userEntity);
     }
 
     @Override
-    public void deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
+    public UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
@@ -192,5 +190,6 @@ public class UserServiceImpl implements UserService {
             userEntity.setUserTypes(userTypes);
             userRepository.save(userEntity);
         }
+        return this.userMapper.toDTO(userEntity);
     }
 }
