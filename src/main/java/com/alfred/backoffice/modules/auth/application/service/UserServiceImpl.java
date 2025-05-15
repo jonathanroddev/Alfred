@@ -22,6 +22,7 @@ import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEn
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserTypeEntity;
+import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -43,7 +44,6 @@ public class UserServiceImpl implements UserService {
     private final UserStatusService userStatusService;
     private final UserTypeService userTypeService;
 
-    // TODO: This must be migrate to FirebaseAuthenticationFilter
     @SneakyThrows
     public boolean isActive(User user) {
         return Objects.equals(user.getUserStatus().getName(), "active");
@@ -70,17 +70,26 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     @Override
     public UserDTO signup(UserSignup userSignup){
+        // TODO: Limit to admin or manager in same community (need Authentication authentication)
        return this.createUser(userSignup);
     }
 
-    // TODO: Create method for massive signup for managers. Example: List<String> mails | Getting the community by SecurityContextHolder
-
     @Override
-    public UserDTO createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException {
+    public UserDTO createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
         CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
-        // TODO: Handle exception on duplicate in Firebase to check if exists with same community in Alfred
-        String externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
         UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity("pending");
+        String externalUuid = "";
+        try {
+            externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
+        } catch (ConflictException ce) {
+            externalUuid = ce.getCode();
+            Optional<UserEntity> userEntity = this.userRepository.findByExternalUuidAndCommunityUuid(externalUuid, communityEntity.getUuid());
+            if (userEntity.isPresent()) {
+                throw new ConflictException("amg-409_1");
+            }
+        } catch (FirebaseAuthException fbe) {
+            throw new BadGatewayException("amg-502_1");
+        }
         UserEntity userEntity = new UserEntity();
         userEntity.setExternalUuid(externalUuid);
         userEntity.setCommunity(communityEntity);
@@ -107,13 +116,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException {
-        // TODO: Handle exceptions on UUID
-        Optional<UserEntity> userEntity = userRepository.findByExternalUuidAndCommunityUuid(externalUuid, UUID.fromString(communityId));
-        if (userEntity.isPresent()){
-            return userMapper.toModel(userEntity.get());
+    public User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException, BadRequestException{
+        try {
+            Optional<UserEntity> userEntity = userRepository.findByExternalUuidAndCommunityUuid(externalUuid, UUID.fromString(communityId));
+            if (userEntity.isPresent()){
+                return userMapper.toModel(userEntity.get());
+            }
+            throw new NotFoundException("amg-404_1");
+        } catch (IllegalArgumentException iae) {
+            throw new BadRequestException("amg-400_6");
         }
-        throw new NotFoundException("amg-404_1");
     }
 
     @Override
@@ -125,7 +137,7 @@ public class UserServiceImpl implements UserService {
         return user.getUserTypes().stream().anyMatch(userType -> userType.getLevel() <= 0);
     }
 
-    private boolean shareCommunity(User manager, User user) throws NotFoundException{
+    private boolean shareCommunity(User manager, User user) throws NotFoundException, BadRequestException{
         return Objects.equals(manager.getCommunity(), user.getCommunity());
     }
 
@@ -135,7 +147,7 @@ public class UserServiceImpl implements UserService {
         return managerMinUserType.getLevel() < userMinUserType.getLevel();
     }
 
-    private void canPerform(User manager, User user) throws NotFoundException, ForbiddenException {
+    private void canPerform(User manager, User user) throws NotFoundException, ForbiddenException, BadRequestException {
         if (!this.isAdmin(manager) && (!this.shareCommunity(manager, user) || !this.isOverUser(manager, user))) {
             throw new ForbiddenException("amg-403_1");
         }
@@ -143,32 +155,39 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException {
-        // TODO: Handle UUID.fromString exceptions in all project
-        UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
-        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
-        userEntity.setUserStatus(userStatusEntity);
-        this.userRepository.save(userEntity);
-        return this.userMapper.toDTO(userEntity);
+    public UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException, BadRequestException {
+        try {
+            UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
+            UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity(userStatusDTO.getName());
+            userEntity.setUserStatus(userStatusEntity);
+            this.userRepository.save(userEntity);
+            return this.userMapper.toDTO(userEntity);
+        } catch (IllegalArgumentException iae) {
+            throw new BadRequestException("amg-400_6");
+        }
     }
 
-    private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
-        UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
-        UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
-        User user = userMapper.toModel(userEntity);
-        User manager = (User) authentication.getPrincipal();
-        // Check if manager can perform action over user
-        this.canPerform(manager, user);
-        // Check that the level of the user type to set is higher than the lowest of the manager
-        UserType managerMinUserType = manager.getUserTypes().stream().min(Comparator.comparingInt(UserType::getLevel)).get();
-        if (userTypeEntity.getLevel() <= managerMinUserType.getLevel()) {
-            throw new ForbiddenException("amg-403_2");
+    private UserEntity getUserToPerformTypeUpdates(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException {
+        try {
+            UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
+            UserEntity userEntity = this.getUserEntity(UUID.fromString(uuid));
+            User user = userMapper.toModel(userEntity);
+            User manager = (User) authentication.getPrincipal();
+            // Check if manager can perform action over user
+            this.canPerform(manager, user);
+            // Check that the level of the user type to set is higher than the lowest of the manager
+            UserType managerMinUserType = manager.getUserTypes().stream().min(Comparator.comparingInt(UserType::getLevel)).get();
+            if (userTypeEntity.getLevel() <= managerMinUserType.getLevel()) {
+                throw new ForbiddenException("amg-403_2");
+            }
+            return userEntity;
+        } catch (IllegalArgumentException iae) {
+            throw new BadRequestException("amg-400_6");
         }
-        return userEntity;
     }
 
     @Override
-    public UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
+    public UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
@@ -181,7 +200,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException {
+    public UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());

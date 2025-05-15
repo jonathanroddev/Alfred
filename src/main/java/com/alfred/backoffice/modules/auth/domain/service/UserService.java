@@ -24,9 +24,9 @@ public interface UserService {
     UserDTO createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException;
     UserEntity getUserEntity(UUID uuid) throws NotFoundException;
     User getUser(UUID uuid);
-    User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException;
+    User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException, BadRequestException;
     List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication);
-    UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException;
-    UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException;
-    UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException;
+    UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException, BadRequestException;
+    UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException;
+    UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException;
 }

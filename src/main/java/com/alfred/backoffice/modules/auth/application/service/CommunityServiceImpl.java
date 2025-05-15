@@ -2,6 +2,7 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
 import com.alfred.backoffice.modules.auth.application.dto.response.CommunityDTO;
+import com.alfred.backoffice.modules.auth.domain.exception.BadRequestException;
 import com.alfred.backoffice.modules.auth.domain.exception.NotFoundException;
 import com.alfred.backoffice.modules.auth.domain.exception.UnprocessableEntityException;
 import com.alfred.backoffice.modules.auth.domain.model.Community;
@@ -32,17 +33,21 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public Community getCommunity(String uuid) throws NotFoundException {
+    public Community getCommunity(String uuid) throws NotFoundException, BadRequestException {
         return communityMapper.toModel(this.getCommunityEntity(uuid));
     }
 
     @Override
-    public CommunityEntity getCommunityEntity(String uuid) throws NotFoundException {
-        Optional<CommunityEntity> communityEntity = this.communityRepository.findById(UUID.fromString(uuid));
-        if (communityEntity.isEmpty()) {
-            throw new NotFoundException("amg-404_3");
+    public CommunityEntity getCommunityEntity(String uuid) throws NotFoundException, BadRequestException {
+        try {
+            Optional<CommunityEntity> communityEntity = this.communityRepository.findById(UUID.fromString(uuid));
+            if (communityEntity.isEmpty()) {
+                throw new NotFoundException("amg-404_3");
+            }
+            return communityEntity.get();
+        } catch (IllegalArgumentException iae) {
+            throw new BadRequestException("amg-400_5");
         }
-        return communityEntity.get();
     }
 
     @Override

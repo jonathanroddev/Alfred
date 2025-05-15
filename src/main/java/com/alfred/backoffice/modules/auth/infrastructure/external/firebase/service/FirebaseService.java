@@ -20,33 +20,34 @@ import org.springframework.web.client.RestClient;
 public class FirebaseService {
 
     private static final String DUPLICATE_ACCOUNT_ERROR = "EMAIL_EXISTS";
-    private static final Logger log =  LoggerFactory.getLogger(FirebaseService.class);
+    private static final String API_KEY_PARAM = "key";
+    private static final String INVALID_CREDENTIALS_ERROR = "INVALID_LOGIN_CREDENTIALS";
+    private static final String SIGN_IN_BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
+    private static final Logger logger =  LoggerFactory.getLogger(FirebaseService.class);
 
-    public String createUser(String emailId, String password) throws ConflictException, BadGatewayException {
+
+    @Value("${firebase.api-key}")
+    private String webApiKey;
+
+    public String createUser(String email, String password) throws ConflictException, BadGatewayException, FirebaseAuthException {
         UserRecord.CreateRequest request = new UserRecord.CreateRequest();
-        request.setEmail(emailId);
+        request.setEmail(email);
         request.setPassword(password);
         request.setEmailVerified(Boolean.TRUE);
-
         try {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             UserRecord userRecord = firebaseAuth.createUser(request);
             return userRecord.getUid();
         } catch (FirebaseAuthException exception) {
+            logger.error(exception.getMessage());
             if (exception.getMessage().contains(DUPLICATE_ACCOUNT_ERROR)) {
-                throw new ConflictException("amg-409_1");
+                UserRecord userRecord = this.getUserRecord(email);
+                throw new ConflictException(userRecord.getUid());
             }
-            log.error("Firebase auth sign up error", exception);
+            logger.error("Firebase auth sign up error", exception);
             throw new BadGatewayException("amg-502_1");
         }
     }
-
-    private static final String API_KEY_PARAM = "key";
-    private static final String INVALID_CREDENTIALS_ERROR = "INVALID_LOGIN_CREDENTIALS";
-    private static final String SIGN_IN_BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
-
-    @Value("${firebase.api-key}")
-    private String webApiKey;
 
     public FirebaseSignInResponse login(String emailId, String password) throws BadRequestException, BadGatewayException {
         FirebaseSignInRequest requestBody = new FirebaseSignInRequest(emailId, password, true);
@@ -68,8 +69,13 @@ public class FirebaseService {
             if (exception.getResponseBodyAsString().contains(INVALID_CREDENTIALS_ERROR)) {
                 throw new BadRequestException("amg-400_1");
             }
-            log.error("Firebase auth login error", exception);
+            logger.error("Firebase auth login error", exception);
             throw new BadGatewayException("amg-502_2");
         }
+    }
+
+    private UserRecord getUserRecord(String mail) throws FirebaseAuthException {
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        return firebaseAuth.getUserByEmail(mail);
     }
 }
