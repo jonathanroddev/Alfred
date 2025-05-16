@@ -69,8 +69,11 @@ public class UserServiceImpl implements UserService {
     // Method used by Alfred's team
     @SneakyThrows
     @Override
-    public UserDTO signup(UserSignup userSignup){
-        // TODO: Limit to admin or manager in same community (need Authentication authentication)
+    public UserDTO signup(Authentication authentication, UserSignup userSignup) throws ForbiddenException {
+        User manager = (User) authentication.getPrincipal();
+        if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), userSignup.getCommunityId()))) {
+            throw new ForbiddenException("amg-403_3");
+        }
        return this.createUser(userSignup);
     }
 

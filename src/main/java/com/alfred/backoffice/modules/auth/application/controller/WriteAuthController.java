@@ -34,7 +34,7 @@ public class WriteAuthController {
         instead of an user himself. One thing we can do, is auto generate a password and sent it to the final user
         besides a link to reset it.
          */
-        return this.userService.signup(userSignup);
+        return this.userService.signup(SecurityContextHolder.getContext().getAuthentication(), userSignup);
     }
 
     @PostMapping(path = "/login")
