@@ -124,6 +124,20 @@ public class UserServiceImpl implements UserService {
             }
             throw new NotFoundException("amg-404_1");
         } catch (IllegalArgumentException iae) {
+            throw new BadRequestException("amg-400_5");
+        }
+    }
+
+    @Transactional
+    @Override
+    public User getUserByUuidAndExternalUuid(String uuid, String externalUuid) throws NotFoundException, BadRequestException {
+        try {
+            Optional<UserEntity> userEntity = userRepository.findByUuidAndExternalUuid(UUID.fromString(uuid), externalUuid);
+            if (userEntity.isPresent()){
+                return userMapper.toModel(userEntity.get());
+            }
+            throw new NotFoundException("amg-404_1");
+        } catch (IllegalArgumentException iae) {
             throw new BadRequestException("amg-400_6");
         }
     }

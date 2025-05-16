@@ -34,7 +34,7 @@ public class OpenAPIConfig {
                         addList("Bearer Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", createAPIKeyScheme())
-                        .addHeaders("amg-community", new Header()))
+                        .addHeaders("amg-user", new Header()))
                 .info(new Info().title("Alfred MG API")
                         .description("API of Alfred MG")
                         .version("1.0").contact(new Contact().name("Alfred MG Team")
@@ -49,8 +49,8 @@ public class OpenAPIConfig {
                     pathItem.readOperations().forEach(operation -> {
                         Parameter customHeader = new Parameter()
                                 .in("header")
-                                .name("amg-community")
-                                .description("Community UUID")
+                                .name("amg-user")
+                                .description("User UUID")
                                 .required(true)
                                 .schema(new StringSchema());
                         operation.addParametersItem(customHeader);

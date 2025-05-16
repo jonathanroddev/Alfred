@@ -62,13 +62,12 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String idToken = request.getHeader("Authorization");
-            // TODO: See if has sense to send amg-uuid doing reference to the internal user uuid instead of this
-            String idCommunity = request.getHeader("amg-community");
+            String userID = request.getHeader("amg-user");
 
-            FirebaseToken token = getToken(idToken, idCommunity);
+            FirebaseToken token = getToken(idToken, userID);
 
             try {
-                User user = userService.getUserByExternalUuidAndCommunity(token.getUid(), idCommunity);
+                User user = userService.getUserByUuidAndExternalUuid(userID, token.getUid());
                 if(!this.userService.isActive(user)) {
                     throw new UnauthorizedException("amg-401_3");
                 }

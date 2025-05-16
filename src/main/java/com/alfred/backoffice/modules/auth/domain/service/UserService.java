@@ -25,6 +25,7 @@ public interface UserService {
     UserEntity getUserEntity(UUID uuid) throws NotFoundException;
     User getUser(UUID uuid);
     User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException, BadRequestException;
+    User getUserByUuidAndExternalUuid(String uuid, String externalUuid) throws NotFoundException, BadRequestException;
     List<UserTypeDTO> getAllUserTypesFilterByAuth(Authentication authentication);
     UserDTO updateStatusOfUser(String uuid, UserStatusDTO userStatusDTO) throws NotFoundException, BadRequestException;
     UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException;
