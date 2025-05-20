@@ -66,7 +66,8 @@ public class UserServiceImpl implements UserService {
         return new UserLoginResponse(firebaseSignInResponse, users);
     }
 
-    // Method used by Alfred's team
+    // TODO: Do askForRegistration method. This method should send a mail to the admin. Target: new customers.
+
     @SneakyThrows
     @Override
     public UserDTO signup(Authentication authentication, UserSignup userSignup) throws ForbiddenException {
@@ -74,11 +75,16 @@ public class UserServiceImpl implements UserService {
         if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), userSignup.getCommunityId()))) {
             throw new ForbiddenException("amg-403_3");
         }
-       return this.createUser(userSignup);
+       return this.createUser(manager.getUuid(), userSignup);
     }
 
     @Override
-    public UserDTO createUser(UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
+    public UserDTO createUser(String managerId, UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
+        /* TODO: Check flow.
+        The best scenario is not to send the password. That's because this process involves an admin or a manager
+        instead of an user himself. One thing we can do, is auto generate a password and sent it to the final user
+        besides a link to reset it. Also, a mail has to be sent to the admin in order to change the user status.
+         */
         CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
         UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity("pending");
         String externalUuid = "";
@@ -97,6 +103,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setExternalUuid(externalUuid);
         userEntity.setCommunity(communityEntity);
         userEntity.setUserStatus(userStatusEntity);
+        userEntity.setCreatedBy(managerId);
         userRepository.save(userEntity);
         return this.userMapper.toDTO(userEntity);
     }
@@ -206,6 +213,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO addTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
+        User manager = (User) authentication.getPrincipal();
+        userEntity.setUpdatedBy(manager.getUuid());
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
         if (!userTypes.contains(userTypeEntity)) {
@@ -219,6 +228,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO deleteTypeOfUser(Authentication authentication, String uuid, UserTypeDTO userTypeDTO) throws NotFoundException, ForbiddenException, BadRequestException {
         UserEntity userEntity = this.getUserToPerformTypeUpdates(authentication, uuid, userTypeDTO);
+        User manager = (User) authentication.getPrincipal();
+        userEntity.setUpdatedBy(manager.getUuid());
         Set<UserTypeEntity> userTypes = userEntity.getUserTypes();
         UserTypeEntity userTypeEntity = this.userTypeService.getUserTypeEntity(userTypeDTO.getName());
         if (userTypes.contains(userTypeEntity)) {

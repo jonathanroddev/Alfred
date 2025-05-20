@@ -28,14 +28,11 @@ public class WriteAuthController {
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/signup")
     @Tag(name = "Access")
-    UserDTO createUser(@RequestBody UserSignup userSignup) {
-        /* TODO: Check flow.
-        The best scenario is not to send the password. That's because this process involves an admin or a manager
-        instead of an user himself. One thing we can do, is auto generate a password and sent it to the final user
-        besides a link to reset it.
-         */
+    UserDTO signup(@RequestBody UserSignup userSignup) {
         return this.userService.signup(SecurityContextHolder.getContext().getAuthentication(), userSignup);
     }
+
+    // TODO: Do endpoint POST /registry. Add it to unrestricted.paths
 
     @PostMapping(path = "/login")
     @Tag(name = "Access")
