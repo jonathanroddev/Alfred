@@ -14,7 +14,6 @@ Backend for **Alfred MG**, the _automated building management_.
 - Spring Modulith
 - PostgreSQL Driver
 - Spring Web
-- Swagger
 
 ## Requirements
 
@@ -30,6 +29,5 @@ For building and running the application you need:
 ## Authors
 
 - [_@jayad23_](https://github.com/jayad23)
-- [_@gneologic_](https://github.com/gneologic)
 - [_@jonathanroddev_](https://github.com/jonathanroddev)
 
