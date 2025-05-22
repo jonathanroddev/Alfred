@@ -25,11 +25,12 @@ public class WriteAuthController {
     private final PlanService planService;
     private final ResourceService resourceService;
 
+    // TODO: This method should accept a list of UserSignup (without passwords)
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
-    @PostMapping(path = "/signup")
+    @PostMapping(path = "/users")
     @Tag(name = "Access")
-    UserDTO signup(@RequestBody UserSignup userSignup) {
-        return this.userService.signup(SecurityContextHolder.getContext().getAuthentication(), userSignup);
+    UserDTO createUser(@RequestBody UserSignup userSignup) {
+        return this.userService.createUser(SecurityContextHolder.getContext().getAuthentication(), userSignup);
     }
 
     // TODO: Do endpoint POST /registry. Add it to unrestricted.paths
@@ -41,7 +42,7 @@ public class WriteAuthController {
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
-    @PutMapping(path = "/user/{userId}/user-status")
+    @PatchMapping(path = "/user/{userId}/user-status")
     @Tag(name = "User")
     UserDTO updateStatusOfUser(@RequestBody UserStatusDTO userStatusDTO, @PathVariable String userId) throws Exception {
         return this.userService.updateStatusOfUser(userId, userStatusDTO);

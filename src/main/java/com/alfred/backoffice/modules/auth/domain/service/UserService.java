@@ -20,8 +20,7 @@ public interface UserService {
     boolean hasLevel(User user, int level);
     boolean hasAuth(Authentication authentication, int level);
     UserLoginResponse login(UserLogin userLogin) throws BadRequestException, BadGatewayException;
-    UserDTO signup(Authentication authentication, UserSignup userSignup) throws ForbiddenException;
-    UserDTO createUser(String managerId, UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException;
+    UserDTO createUser(Authentication authentication, UserSignup userSignup) throws ForbiddenException;
     UserEntity getUserEntity(UUID uuid) throws NotFoundException;
     User getUser(UUID uuid);
     User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException, BadRequestException;

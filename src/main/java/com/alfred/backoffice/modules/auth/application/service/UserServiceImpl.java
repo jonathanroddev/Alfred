@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     @SneakyThrows
     @Override
-    public UserDTO signup(Authentication authentication, UserSignup userSignup) throws ForbiddenException {
+    public UserDTO createUser(Authentication authentication, UserSignup userSignup) throws ForbiddenException {
         User manager = (User) authentication.getPrincipal();
         if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), userSignup.getCommunityId()))) {
             throw new ForbiddenException("amg-403_3");
@@ -78,8 +78,7 @@ public class UserServiceImpl implements UserService {
        return this.createUser(manager.getUuid(), userSignup);
     }
 
-    @Override
-    public UserDTO createUser(String managerId, UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
+    private UserDTO createUser(String managerId, UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
         /* TODO: Check flow.
         The best scenario is not to send the password. That's because this process involves an admin or a manager
         instead of an user himself. One thing we can do, is auto generate a password and sent it to the final user
