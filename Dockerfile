@@ -6,8 +6,10 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Run stage
-FROM eclipse-temurin:21.0.5_11-jdk
+FROM eclipse-temurin:21.0.5_11-jre
 WORKDIR /backoffice
 COPY --from=builder /backoffice/target/backoffice-0.0.1-SNAPSHOT.jar alfred.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "alfred.jar"]
+
+ENTRYPOINT ["java", "-Xms128m", "-Xmx256m", "-XX:+UseContainerSupport", "-jar", "alfred.jar"]
