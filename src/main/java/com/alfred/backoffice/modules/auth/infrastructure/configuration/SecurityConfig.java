@@ -41,7 +41,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://alfred-production-d78e.up.railway.app", "http://alfred-production-d78e.up.railway.app","http://localhost:8080"));
+        // TODO: Add the origins as environment variable
+        configuration.setAllowedOrigins(List.of("https://alfred.up.railway.app/p","http://localhost:8080"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
