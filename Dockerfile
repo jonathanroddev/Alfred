@@ -3,7 +3,7 @@ FROM maven:3.9.4-eclipse-temurin-21 AS builder
 WORKDIR /backoffice
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -P !dev -DskipTests
 
 # Run stage
 FROM eclipse-temurin:21.0.5_11-jre
