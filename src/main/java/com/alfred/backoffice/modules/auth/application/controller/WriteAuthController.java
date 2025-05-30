@@ -1,5 +1,6 @@
 package com.alfred.backoffice.modules.auth.application.controller;
 
+import com.alfred.backoffice.modules.auth.application.dto.request.SignupRequest;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.application.dto.response.*;
@@ -25,12 +26,11 @@ public class WriteAuthController {
     private final PlanService planService;
     private final ResourceService resourceService;
 
-    // TODO: This method should accept a list of UserSignup (without passwords)
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/users")
     @Tag(name = "Access")
-    UserDTO createUser(@RequestBody UserSignup userSignup) {
-        return this.userService.createUser(SecurityContextHolder.getContext().getAuthentication(), userSignup);
+    SignupResponse signupUsers(@RequestBody SignupRequest signupRequest) {
+        return this.userService.signupUsers(SecurityContextHolder.getContext().getAuthentication(), signupRequest);
     }
 
     // TODO: Do endpoint POST /registry. Add it to unrestricted.paths

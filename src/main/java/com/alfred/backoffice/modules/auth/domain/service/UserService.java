@@ -1,11 +1,9 @@
 package com.alfred.backoffice.modules.auth.domain.service;
 
+import com.alfred.backoffice.modules.auth.application.dto.request.SignupRequest;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserLoginResponse;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
+import com.alfred.backoffice.modules.auth.application.dto.response.*;
 import com.alfred.backoffice.modules.auth.domain.exception.*;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
@@ -20,7 +18,7 @@ public interface UserService {
     boolean hasLevel(User user, int level);
     boolean hasAuth(Authentication authentication, int level);
     UserLoginResponse login(UserLogin userLogin) throws BadRequestException, BadGatewayException;
-    UserDTO createUser(Authentication authentication, UserSignup userSignup) throws ForbiddenException;
+    SignupResponse signupUsers(Authentication authentication, SignupRequest signupRequest) throws ForbiddenException, NotFoundException, BadRequestException;
     UserEntity getUserEntity(UUID uuid) throws NotFoundException;
     User getUser(UUID uuid);
     User getUserByExternalUuidAndCommunity(String externalUuid, String communityId) throws NotFoundException, BadRequestException;

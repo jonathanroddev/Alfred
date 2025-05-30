@@ -26,6 +26,9 @@ For building and running the application you need:
 - **${host}**_/api/docs_
 - **${host}**_/api/swagger-ui/index.html_
 
+#### And the OpenAPI definition at:
+- **${host}**_/api/api-docs_
+
 ## Authors
 
 - [_@jayad23_](https://github.com/jayad23)

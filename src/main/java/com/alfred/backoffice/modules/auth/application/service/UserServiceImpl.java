@@ -2,12 +2,10 @@ package com.alfred.backoffice.modules.auth.application.service;
 
 import com.alfred.backoffice.modules.auth.application.dto.mapper.CommunityMapper;
 import com.alfred.backoffice.modules.auth.application.dto.mapper.UserMapper;
+import com.alfred.backoffice.modules.auth.application.dto.request.SignupRequest;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserLoginResponse;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserStatusDTO;
-import com.alfred.backoffice.modules.auth.application.dto.response.UserTypeDTO;
+import com.alfred.backoffice.modules.auth.application.dto.response.*;
 import com.alfred.backoffice.modules.auth.domain.exception.*;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.model.UserType;
@@ -16,6 +14,7 @@ import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
 import com.alfred.backoffice.modules.auth.domain.service.UserService;
 import com.alfred.backoffice.modules.auth.domain.service.UserStatusService;
 import com.alfred.backoffice.modules.auth.domain.service.UserTypeService;
+import com.alfred.backoffice.modules.auth.infrastructure.configuration.ErrorMessageProperties;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.model.FirebaseSignInResponse;
 import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.service.FirebaseService;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEntity;
@@ -43,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final CommunityService communityService;
     private final UserStatusService userStatusService;
     private final UserTypeService userTypeService;
+    private final ErrorMessageProperties errorMessages;
 
     @SneakyThrows
     public boolean isActive(User user) {
@@ -70,33 +70,43 @@ public class UserServiceImpl implements UserService {
 
     @SneakyThrows
     @Override
-    public UserDTO createUser(Authentication authentication, UserSignup userSignup) throws ForbiddenException {
+    public SignupResponse signupUsers(Authentication authentication, SignupRequest signupRequest) throws ForbiddenException, NotFoundException, BadRequestException {
         User manager = (User) authentication.getPrincipal();
-        if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), userSignup.getCommunityId()))) {
+        if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), signupRequest.getCommunityId()))) {
             throw new ForbiddenException("amg-403_3");
         }
-       return this.createUser(manager.getUuid(), userSignup);
+        return new SignupResponse(this.signupUsersInExternal(manager.getUuid(), signupRequest), signupRequest.getCommunityId());
     }
 
-    private UserDTO createUser(String managerId, UserSignup userSignup) throws NotFoundException, ConflictException, BadGatewayException, BadRequestException {
+    private Map<String, SignupStatus> signupUsersInExternal(String managerId, SignupRequest signupRequest) throws NotFoundException, BadRequestException {
+        CommunityEntity communityEntity = this.communityService.getCommunityEntity(signupRequest.getCommunityId());
+        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity("pending");
+        Map<String, SignupStatus> result = new HashMap<>();
+        signupRequest.getUsers().forEach(userSignup -> {
+            String code = this.signupSingleUserInExternal(userSignup, communityEntity, userStatusEntity, managerId);
+            String message = Objects.equals(code, "amg-201_1") ? "User created in external" : this.errorMessages.getMessage(code);
+            result.put(userSignup.getMail(), new SignupStatus(code, message));
+        });
+        return result;
+    }
+
+    private String signupSingleUserInExternal(UserSignup userSignup, CommunityEntity communityEntity, UserStatusEntity userStatusEntity, String managerId) {
         /* TODO: Check flow.
-        The best scenario is not to send the password. That's because this process involves an admin or a manager
-        instead of an user himself. One thing we can do, is auto generate a password and sent it to the final user
+        Because this process involves an admin or a manager, one thing we can do is auto generate a password and sent it to the final user
         besides a link to reset it. Also, a mail has to be sent to the admin in order to change the user status.
          */
-        CommunityEntity communityEntity = this.communityService.getCommunityEntity(userSignup.getCommunityId());
-        UserStatusEntity userStatusEntity = this.userStatusService.getUserStatusEntity("pending");
+        SignupStatus signupStatus = new SignupStatus("", "");
         String externalUuid = "";
         try {
-            externalUuid = this.firebaseService.createUser(userSignup.getMail(), userSignup.getPassword());
+            externalUuid = this.firebaseService.createUser(userSignup.getMail(), UUID.randomUUID().toString());
         } catch (ConflictException ce) {
             externalUuid = ce.getCode();
             Optional<UserEntity> userEntity = this.userRepository.findByExternalUuidAndCommunityUuid(externalUuid, communityEntity.getUuid());
             if (userEntity.isPresent()) {
-                throw new ConflictException("amg-409_1");
+                return "amg-409_1";
             }
         } catch (FirebaseAuthException fbe) {
-            throw new BadGatewayException("amg-502_1");
+            return "amg-502_1";
         }
         UserEntity userEntity = new UserEntity();
         userEntity.setExternalUuid(externalUuid);
@@ -104,7 +114,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserStatus(userStatusEntity);
         userEntity.setCreatedBy(managerId);
         userRepository.save(userEntity);
-        return this.userMapper.toDTO(userEntity);
+        return "amg-201_1";
     }
 
     @Transactional

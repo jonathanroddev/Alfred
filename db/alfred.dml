@@ -1,6 +1,6 @@
 BEGIN;
 
-* Initial
+-- Initial
 INSERT INTO alfred_v1.user_types (name, level) VALUES ('admin', 0);
 INSERT INTO alfred_v1.user_types (name, level) VALUES ('tester', 1);
 INSERT INTO alfred_v1.user_types (name, level) VALUES ('manager', 1);
@@ -12,7 +12,7 @@ INSERT INTO alfred_v1.user_status (name) VALUES ('inactive');
 INSERT INTO alfred_v1.user_status (name) VALUES ('suspended');
 INSERT INTO alfred_v1.user_status (name) VALUES ('pending');
 INSERT INTO alfred_v1.plans (name) VALUES ('admin_plan');
-INSERT INTO alfred_v1.communities (uuid, name, plan) VALUES ('c96542c8-d916-4376-b4be-1c0d75f62a54', 'alfred_admins', 'admin');
+INSERT INTO alfred_v1.communities (uuid, name, plan) VALUES ('c96542c8-d916-4376-b4be-1c0d75f62a54', 'alfred_admins', 'admin_plan');
 
 INSERT INTO alfred_v1.users (uuid, external_uuid, user_status, community, _created_by, _updated_by) VALUES ('f26cf55b-9bb2-4583-8aba-4ffc79c0be9e', <externalUuid>, 'active', 'c96542c8-d916-4376-b4be-1c0d75f62a54', 'f26cf55b-9bb2-4583-8aba-4ffc79c0be9e', 'f26cf55b-9bb2-4583-8aba-4ffc79c0be9e');
 INSERT INTO alfred_v1.user_groups ("user", user_type) VALUES ('f26cf55b-9bb2-4583-8aba-4ffc79c0be9e', 'admin');

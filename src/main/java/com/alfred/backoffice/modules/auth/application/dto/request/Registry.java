@@ -5,7 +5,8 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class UserSignup {
+public class Registry {
     // TODO: Add mail validation
     private String mail;
+    private String comment;
 }
