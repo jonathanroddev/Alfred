@@ -21,6 +21,7 @@ import com.alfred.backoffice.modules.auth.infrastructure.persistence.CommunityEn
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusEntity;
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserTypeEntity;
+import com.alfred.backoffice.modules.mail.domain.MailSender;
 import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
     private final UserStatusService userStatusService;
     private final UserTypeService userTypeService;
     private final ErrorMessageProperties errorMessages;
+    private final MailSender mailSender;
 
     @SneakyThrows
     public boolean isActive(User user) {
@@ -72,10 +74,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public SignupResponse signupUsers(Authentication authentication, SignupRequest signupRequest) throws ForbiddenException, NotFoundException, BadRequestException {
         User manager = (User) authentication.getPrincipal();
-        if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), signupRequest.getCommunityId()))) {
+        String communityId = signupRequest.getCommunityId();
+        if (!this.isAdmin(manager) && (!Objects.equals(manager.getCommunity().getUuid(), communityId))) {
             throw new ForbiddenException("amg-403_3");
         }
-        return new SignupResponse(this.signupUsersInExternal(manager.getUuid(), signupRequest), signupRequest.getCommunityId());
+        SignupResponse signupResponse = new SignupResponse(this.signupUsersInExternal(manager.getUuid(), signupRequest), communityId);
+        boolean existSuccess = signupResponse.getResult().values().stream().anyMatch(signupStatus -> Objects.equals(signupStatus.getCode(), "amg-201_1"));
+        if (existSuccess) {
+            this.sendNewUsersMail(communityId);
+        }
+        return signupResponse;
     }
 
     private Map<String, SignupStatus> signupUsersInExternal(String managerId, SignupRequest signupRequest) throws NotFoundException, BadRequestException {
@@ -91,14 +99,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private String signupSingleUserInExternal(UserSignup userSignup, CommunityEntity communityEntity, UserStatusEntity userStatusEntity, String managerId) {
-        /* TODO: Check flow.
-        Because this process involves an admin or a manager, one thing we can do is auto generate a password and sent it to the final user
-        besides a link to reset it. Also, a mail has to be sent to the admin in order to change the user status.
-         */
+        String userMail = userSignup.getMail();
         SignupStatus signupStatus = new SignupStatus("", "");
         String externalUuid = "";
+        String temporalPassword = UUID.randomUUID().toString();
+        Optional<String> resetLink = Optional.empty();
         try {
-            externalUuid = this.firebaseService.createUser(userSignup.getMail(), UUID.randomUUID().toString());
+            externalUuid = this.firebaseService.createUser(userMail, temporalPassword);
+            resetLink = this.firebaseService.getResetPasswordLink(userMail).describeConstable();
         } catch (ConflictException ce) {
             externalUuid = ce.getCode();
             Optional<UserEntity> userEntity = this.userRepository.findByExternalUuidAndCommunityUuid(externalUuid, communityEntity.getUuid());
@@ -114,7 +122,25 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserStatus(userStatusEntity);
         userEntity.setCreatedBy(managerId);
         userRepository.save(userEntity);
+        this.sendWelcomeMail(userMail, temporalPassword, resetLink);
         return "amg-201_1";
+    }
+
+    private void sendWelcomeMail(String userMail, String temporalPassword, Optional<String> resetLink) {
+        String subject = "¡Bienvenid@ a Alfred MG!";
+        String text = "Hola y bienvenid@ a Alfred MG.";
+        if (resetLink.isPresent()) {
+            // TODO: Add link as html element
+            text += "\n Tu contraseña temporal es " + temporalPassword + ". \n Por favor, cámbiala en el siguiente enlace: " + resetLink.get();
+        }
+        this.mailSender.sendGenericMail(userMail, subject, text);
+    }
+
+    private void sendNewUsersMail(String communityId) {
+        // TODO: Consider replace communityId for community name
+        String subject = "Nuevos usuarios en " + communityId;
+        String text = "Hay nuevos usuarios dados de alta en la comunidad con el UUID: " + communityId + " que esperan a ser activados.";
+        this.mailSender.sendMailToAdmin(subject, text);
     }
 
     @Transactional

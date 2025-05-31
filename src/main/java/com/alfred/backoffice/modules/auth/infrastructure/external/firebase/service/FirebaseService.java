@@ -33,7 +33,7 @@ public class FirebaseService {
         UserRecord.CreateRequest request = new UserRecord.CreateRequest();
         request.setEmail(email);
         request.setPassword(password);
-        request.setEmailVerified(Boolean.TRUE);
+        request.setEmailVerified(Boolean.FALSE);
         try {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             UserRecord userRecord = firebaseAuth.createUser(request);
@@ -47,6 +47,10 @@ public class FirebaseService {
             logger.error("Firebase auth sign up error", exception);
             throw new BadGatewayException("amg-502_1");
         }
+    }
+
+    public String getResetPasswordLink(String mail) throws FirebaseAuthException {
+        return FirebaseAuth.getInstance().generatePasswordResetLink(mail);
     }
 
     public FirebaseSignInResponse login(String emailId, String password) throws BadRequestException, BadGatewayException {

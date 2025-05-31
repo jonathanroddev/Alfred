@@ -25,6 +25,8 @@ public class GetAuthController {
     private final UserTypeService userTypeService;
     private final UserService userService;
 
+    // TODO: Do endpoint for get users of a community. Allow to filter by status and consider pagination
+
     @GetMapping(path = "${public.path}/plans")
     @Tag(name = "Plans")
     List<PlanDTO> getPlans() {
