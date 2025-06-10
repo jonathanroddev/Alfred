@@ -28,7 +28,7 @@ public class WriteAuthController {
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/users")
-    @Tag(name = "Access")
+    @Tag(name = "Users")
     SignupResponse signupUsers(@RequestBody SignupRequest signupRequest) {
         return this.userService.signupUsers(SecurityContextHolder.getContext().getAuthentication(), signupRequest);
     }
@@ -43,21 +43,21 @@ public class WriteAuthController {
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
     @PatchMapping(path = "/user/{userId}/user-status")
-    @Tag(name = "User")
+    @Tag(name = "Users")
     UserDTO updateStatusOfUser(@RequestBody UserStatusDTO userStatusDTO, @PathVariable String userId) throws Exception {
         return this.userService.updateStatusOfUser(userId, userStatusDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/user/{userId}/user-types")
-    @Tag(name = "User")
+    @Tag(name = "Users")
     UserDTO addTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
         return this.userService.addTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @DeleteMapping(path = "/user/{userId}/user-types")
-    @Tag(name = "User")
+    @Tag(name = "Users")
     UserDTO deleteTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
         return this.userService.deleteTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
     }

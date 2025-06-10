@@ -1,5 +1,6 @@
 package com.alfred.backoffice.modules.auth.infrastructure.persistence;
 
+import com.alfred.backoffice.modules.auth.domain.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -78,9 +79,9 @@ public class UserEntity {
         if (this.uuid == null) {
             this.uuid = UUID.randomUUID();
         }
-        String currentUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        this.createdBy = currentUser;
-        this.updatedBy = currentUser;
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        this.createdBy = currentUser.getUuid();
+        this.updatedBy = currentUser.getUuid();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

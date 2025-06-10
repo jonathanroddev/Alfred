@@ -23,6 +23,7 @@ import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserStatusE
 import com.alfred.backoffice.modules.auth.infrastructure.persistence.UserTypeEntity;
 import com.alfred.backoffice.modules.mail.domain.MailSender;
 import com.google.firebase.auth.FirebaseAuthException;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -120,8 +121,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setExternalUuid(externalUuid);
         userEntity.setCommunity(communityEntity);
         userEntity.setUserStatus(userStatusEntity);
-        userEntity.setCreatedBy(managerId);
-        userRepository.save(userEntity);
+        this.userRepository.save(userEntity);
         this.sendWelcomeMail(userMail, temporalPassword, resetLink);
         return "amg-201_1";
     }
@@ -131,16 +131,27 @@ public class UserServiceImpl implements UserService {
         String text = "Hola y bienvenid@ a Alfred MG.";
         if (resetLink.isPresent()) {
             // TODO: Add link as html element
-            text += "\n Tu contraseña temporal es " + temporalPassword + ". \n Por favor, cámbiala en el siguiente enlace: " + resetLink.get();
+            text += "\n Tu contraseña temporal es " + temporalPassword + " \n Por favor, cámbiala en el siguiente enlace: " + resetLink.get();
         }
-        this.mailSender.sendGenericMail(userMail, subject, text);
+        // TODO: Handle exception
+        try {
+            this.mailSender.sendGenericMail(userMail, subject, text);
+        } catch (MessagingException me) {
+            return;
+        }
+
     }
 
     private void sendNewUsersMail(String communityId) {
         // TODO: Consider replace communityId for community name
         String subject = "Nuevos usuarios en " + communityId;
         String text = "Hay nuevos usuarios dados de alta en la comunidad con el UUID: " + communityId + " que esperan a ser activados.";
-        this.mailSender.sendMailToAdmin(subject, text);
+        // TODO: Handle exception
+        try {
+            this.mailSender.sendMailToAdmin(subject, text);
+        } catch (MessagingException me) {
+            return;
+        }
     }
 
     @Transactional
