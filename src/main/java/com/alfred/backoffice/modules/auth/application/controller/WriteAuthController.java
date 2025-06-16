@@ -1,13 +1,10 @@
 package com.alfred.backoffice.modules.auth.application.controller;
 
+import com.alfred.backoffice.modules.auth.application.dto.request.Registry;
 import com.alfred.backoffice.modules.auth.application.dto.request.SignupRequest;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
-import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.application.dto.response.*;
-import com.alfred.backoffice.modules.auth.domain.service.CommunityService;
-import com.alfred.backoffice.modules.auth.domain.service.PlanService;
-import com.alfred.backoffice.modules.auth.domain.service.ResourceService;
-import com.alfred.backoffice.modules.auth.domain.service.UserService;
+import com.alfred.backoffice.modules.auth.domain.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +22,7 @@ public class WriteAuthController {
     private final CommunityService communityService;
     private final PlanService planService;
     private final ResourceService resourceService;
+    private final CustomerService customerService;
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/users")
@@ -33,7 +31,11 @@ public class WriteAuthController {
         return this.userService.signupUsers(SecurityContextHolder.getContext().getAuthentication(), signupRequest);
     }
 
-    // TODO: Do endpoint POST /registry. Add it to unrestricted.paths
+    @PostMapping(path = "${public.path}/join")
+    @Tag(name = "Customers")
+    void askJoin(@RequestBody Registry registry) throws Exception {
+        customerService.askJoin(registry);
+    }
 
     @PostMapping(path = "/login")
     @Tag(name = "Access")

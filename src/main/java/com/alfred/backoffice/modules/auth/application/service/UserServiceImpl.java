@@ -36,7 +36,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final FirebaseService firebaseService;
@@ -131,7 +130,7 @@ public class UserServiceImpl implements UserService {
         String text = "Hola y bienvenid@ a Alfred MG.";
         if (resetLink.isPresent()) {
             // TODO: Add link as html element
-            text += "\n Tu contraseña temporal es " + temporalPassword + " \n Por favor, cámbiala en el siguiente enlace: " + resetLink.get();
+            text += "\n Tu contraseña temporal es " + temporalPassword + " \nPor favor, cámbiala en el siguiente enlace: " + resetLink.get();
         }
         // TODO: Handle exception
         try {

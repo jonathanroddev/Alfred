@@ -1,18 +1,14 @@
 package com.alfred.backoffice.modules.mail.application;
 
 import com.alfred.backoffice.modules.mail.domain.MailSender;
-import com.alfred.backoffice.modules.mail.infrastructure.configuration.MailProperties;
 import com.alfred.backoffice.modules.mail.infrastructure.configuration.OAuth2Properties;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
-import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 @Service
