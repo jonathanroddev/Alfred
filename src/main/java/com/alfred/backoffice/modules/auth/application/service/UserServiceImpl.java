@@ -7,6 +7,7 @@ import com.alfred.backoffice.modules.auth.application.dto.request.UserLogin;
 import com.alfred.backoffice.modules.auth.application.dto.request.UserSignup;
 import com.alfred.backoffice.modules.auth.application.dto.response.*;
 import com.alfred.backoffice.modules.auth.domain.exception.*;
+import com.alfred.backoffice.modules.auth.domain.model.Community;
 import com.alfred.backoffice.modules.auth.domain.model.User;
 import com.alfred.backoffice.modules.auth.domain.model.UserType;
 import com.alfred.backoffice.modules.auth.domain.repository.UserRepository;
@@ -27,6 +28,8 @@ import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +48,8 @@ public class UserServiceImpl implements UserService {
     private final UserTypeService userTypeService;
     private final ErrorMessageProperties errorMessages;
     private final MailSender mailSender;
+
+    private static final Logger logger =  LoggerFactory.getLogger(UserServiceImpl.class);
 
     @SneakyThrows
     public boolean isActive(User user) {
@@ -68,8 +73,6 @@ public class UserServiceImpl implements UserService {
         return new UserLoginResponse(firebaseSignInResponse, users);
     }
 
-    // TODO: Do askForRegistration method. This method should send a mail to the admin. Target: new customers.
-
     @SneakyThrows
     @Override
     public SignupResponse signupUsers(Authentication authentication, SignupRequest signupRequest) throws ForbiddenException, NotFoundException, BadRequestException {
@@ -81,7 +84,8 @@ public class UserServiceImpl implements UserService {
         SignupResponse signupResponse = new SignupResponse(this.signupUsersInExternal(manager.getUuid(), signupRequest), communityId);
         boolean existSuccess = signupResponse.getResult().values().stream().anyMatch(signupStatus -> Objects.equals(signupStatus.getCode(), "amg-201_1"));
         if (existSuccess) {
-            this.sendNewUsersMail(communityId);
+            Community community = this.communityService.getCommunity(communityId);
+            this.sendNewUsersMail(community);
         }
         return signupResponse;
     }
@@ -130,26 +134,27 @@ public class UserServiceImpl implements UserService {
         String text = "Hola y bienvenid@ a Alfred MG.";
         if (resetLink.isPresent()) {
             // TODO: Add link as html element
-            text += "\n Tu contraseña temporal es " + temporalPassword + " \nPor favor, cámbiala en el siguiente enlace: " + resetLink.get();
+            // TODO: Send html instead
+            text += "\nTu contraseña temporal es " + temporalPassword + " \nPor favor, cámbiala en el siguiente enlace: " + resetLink.get();
         }
-        // TODO: Handle exception
         try {
             this.mailSender.sendGenericMail(userMail, subject, text);
         } catch (MessagingException me) {
-            return;
+            logger.error("Error sending mail to: {}. Details: {}", userMail, me.toString());
+            throw new BadGatewayException("amg-502_3");
         }
 
     }
 
-    private void sendNewUsersMail(String communityId) {
-        // TODO: Consider replace communityId for community name
-        String subject = "Nuevos usuarios en " + communityId;
-        String text = "Hay nuevos usuarios dados de alta en la comunidad con el UUID: " + communityId + " que esperan a ser activados.";
-        // TODO: Handle exception
+    private void sendNewUsersMail(Community community) {
+        // TODO: Send html instead
+        String subject = "Nuevos usuarios en " + community.getName();
+        String text = "Hay nuevos usuarios dados de alta en la comunidad " + community.getName() + " con el UUID: " + community.getUuid() + " que esperan a ser activados.";
         try {
             this.mailSender.sendMailToAdmin(subject, text);
         } catch (MessagingException me) {
-            return;
+            logger.error("Error sending mail to: admin. Details: {}", me.toString());
+            throw new BadGatewayException("amg-502_4");
         }
     }
 

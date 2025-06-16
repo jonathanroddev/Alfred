@@ -4,6 +4,7 @@ import com.alfred.backoffice.modules.auth.infrastructure.external.firebase.filte
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,6 +28,9 @@ public class SecurityConfig {
     private final FirebaseAuthenticationFilter firebaseAuthenticationFilter;
     public static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+    @Value("#{'${allowed-origins}'.split(',')}")
+    private final List<String> allowedOrigins;
+
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,8 +45,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // TODO: Add the origins as environment variable
-        configuration.setAllowedOrigins(List.of("https://alfred.up.railway.app/p","http://localhost:8080"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
