@@ -10,6 +10,10 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,19 +21,24 @@ public class MailSenderImpl implements MailSender {
 
     private final OAuth2Properties oAuth2Properties;
     private final Session session;
+    private final TemplateEngine templateEngine;
 
     @Override
-    public void sendGenericMail(String to, String subject, String text) throws MessagingException {
+    public void sendGenericMail(String to, String subject, String templateName, Map<String, Object> vars) throws MessagingException {
+        Context context = new Context();
+        context.setVariables(vars);
+        String htmlContent = templateEngine.process(templateName, context);
+
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(session.getProperty("mail.smtp.user")));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
         message.setSubject(subject);
-        message.setText(text);
+        message.setContent(htmlContent, "text/html; charset=utf-8");
         Transport.send(message);
     }
 
     @Override
-    public void sendMailToAdmin(String subject, String text) throws MessagingException {
-        this.sendGenericMail(oAuth2Properties.getEmail(), subject, text);
+    public void sendMailToAdmin(String subject, String templateName, Map<String, Object> vars) throws MessagingException {
+        this.sendGenericMail(oAuth2Properties.getEmail(), subject, templateName, vars);
     }
 }

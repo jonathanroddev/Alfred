@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bienvenida</title>
+</head>
+<body>
+<p>Hola y bienvenid@ a Alfred MG.</p>
+<div th:style="${hasResetLink ? 'display:block' : 'display:none'}">
+    <p>Tu contraseña temporal es: <b th:text="${temporalPassword}"></b></p>
+    <p>Por favor, cámbiala en el siguiente enlace:</p>
+    <a th:href="@{${resetLink}}">Cambiar contraseña</a>
+</div>
+</body>
+</html>

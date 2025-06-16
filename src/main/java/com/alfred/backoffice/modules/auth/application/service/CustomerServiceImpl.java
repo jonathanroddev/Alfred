@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
@@ -19,11 +22,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void askJoin(Registry registry) {
-        // TODO: Send html instead
-        String subject = "Solicitud de nuevo registro";
-        String text = "Solicitante: " + registry.getMail() + ". \nComentario: " + registry.getComment();
         try {
-            this.mailSender.sendMailToAdmin(subject, text);
+            String subject = "Solicitud de nuevo registro";
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("requester", registry.getMail());
+            vars.put("comment", registry.getComment());
+            this.mailSender.sendMailToAdmin(subject, "ask-join", vars);
         } catch (MessagingException me) {
             logger.error("Error sending mail to: admin. Details: {}", me.toString());
             throw new BadGatewayException("amg-502_4");

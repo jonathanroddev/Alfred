@@ -130,15 +130,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private void sendWelcomeMail(String userMail, String temporalPassword, Optional<String> resetLink) {
-        String subject = "¡Bienvenid@ a Alfred MG!";
-        String text = "Hola y bienvenid@ a Alfred MG.";
-        if (resetLink.isPresent()) {
-            // TODO: Add link as html element
-            // TODO: Send html instead
-            text += "\nTu contraseña temporal es " + temporalPassword + " \nPor favor, cámbiala en el siguiente enlace: " + resetLink.get();
-        }
         try {
-            this.mailSender.sendGenericMail(userMail, subject, text);
+            String subject = "¡Bienvenid@ a Alfred MG!";
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("hasResetLink", resetLink.isPresent());
+            vars.put("temporalPassword", temporalPassword);
+            vars.put("resetLink", resetLink.orElse(""));
+            this.mailSender.sendGenericMail(userMail, subject, "welcome", vars);
         } catch (MessagingException me) {
             logger.error("Error sending mail to: {}. Details: {}", userMail, me.toString());
             throw new BadGatewayException("amg-502_3");
@@ -147,11 +145,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private void sendNewUsersMail(Community community) {
-        // TODO: Send html instead
-        String subject = "Nuevos usuarios en " + community.getName();
-        String text = "Hay nuevos usuarios dados de alta en la comunidad " + community.getName() + " con el UUID: " + community.getUuid() + " que esperan a ser activados.";
         try {
-            this.mailSender.sendMailToAdmin(subject, text);
+            String subject = "Nuevos usuarios en " + community.getName();
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("communityName", community.getName());
+            vars.put("communityUUID", community.getUuid());
+            this.mailSender.sendMailToAdmin(subject,"new-users", vars);
         } catch (MessagingException me) {
             logger.error("Error sending mail to: admin. Details: {}", me.toString());
             throw new BadGatewayException("amg-502_4");

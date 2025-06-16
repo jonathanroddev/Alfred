@@ -27,19 +27,19 @@ public class WriteAuthController {
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
     @PostMapping(path = "/users")
     @Tag(name = "Users")
-    SignupResponse signupUsers(@RequestBody SignupRequest signupRequest) {
+    SignupResponse signupUsers(@RequestBody @Valid SignupRequest signupRequest) {
         return this.userService.signupUsers(SecurityContextHolder.getContext().getAuthentication(), signupRequest);
     }
 
     @PostMapping(path = "${public.path}/join")
     @Tag(name = "Customers")
-    void askJoin(@RequestBody Registry registry) throws Exception {
+    void askJoin(@RequestBody @Valid Registry registry) throws Exception {
         customerService.askJoin(registry);
     }
 
     @PostMapping(path = "/login")
     @Tag(name = "Access")
-    UserLoginResponse login(@RequestBody UserLogin userLogin) throws Exception {
+    UserLoginResponse login(@RequestBody @Valid UserLogin userLogin) throws Exception {
         return this.userService.login(userLogin);
     }
 
