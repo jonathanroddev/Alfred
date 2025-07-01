@@ -34,7 +34,7 @@ public class GetAuthController {
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
-    @GetMapping(path = "/user-status")
+    @GetMapping(path = "/users/status")
     @Tag(name = "Users")
     List<UserStatusDTO> getUserStatus() {
         return userStatusService.getAllUserStatus();
@@ -47,7 +47,7 @@ public class GetAuthController {
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
-    @GetMapping(path = "/user-types")
+    @GetMapping(path = "/users/types")
     @Tag(name = "Users")
     List<UserTypeDTO> getUserTypes() throws Exception {
         return userService.getAllUserTypesFilterByAuth(SecurityContextHolder.getContext().getAuthentication());

@@ -44,21 +44,21 @@ public class WriteAuthController {
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 0)")
-    @PatchMapping(path = "/user/{userId}/user-status")
+    @PatchMapping(path = "/users/{userId}/status")
     @Tag(name = "Users")
     UserDTO updateStatusOfUser(@RequestBody UserStatusDTO userStatusDTO, @PathVariable String userId) throws Exception {
         return this.userService.updateStatusOfUser(userId, userStatusDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
-    @PostMapping(path = "/user/{userId}/user-types")
+    @PostMapping(path = "/users/{userId}/types")
     @Tag(name = "Users")
     UserDTO addTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
         return this.userService.addTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
     }
 
     @PreAuthorize("@userServiceImpl.hasAuth(authentication, 1)")
-    @DeleteMapping(path = "/user/{userId}/user-types")
+    @DeleteMapping(path = "/users/{userId}/types")
     @Tag(name = "Users")
     UserDTO deleteTypeOfUser(@RequestBody UserTypeDTO userTypeDTO, @PathVariable String userId) throws Exception {
         return this.userService.deleteTypeOfUser(SecurityContextHolder.getContext().getAuthentication(), userId, userTypeDTO);
